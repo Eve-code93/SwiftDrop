@@ -39,7 +39,7 @@ def create_app(config_class=Config):
     # Register shell context
     setup_shell_context(app)
 
-    # Optional debug route to view all registered routes
+    # Debug route to view all registered routes
     @app.route("/__debug__/routes")
     def show_routes():
         output = []
@@ -60,15 +60,33 @@ def register_resources(api):
         from app.resources.parcel import ParcelListResource, ParcelResource
         from app.resources.tag import TagListResource
         from app.resources.tracking_log import TrackingLogResource
-
+        from app.resources.admin import UserListResource, UserRoleUpdateResource, AssignAgentResource
+        from app.resources.agent import AgentDeliveryListResource, AgentDeliveryUpdateResource
         print("✔ All resources imported")
 
+        # Auth
         api.add_resource(Register, '/auth/register', endpoint='register')
         api.add_resource(Login, '/auth/login', endpoint='login')
+
+        # Parcel
         api.add_resource(ParcelListResource, '/parcels', endpoint='parcel_list')
         api.add_resource(ParcelResource, '/parcels/<int:parcel_id>', endpoint='parcel_detail')
+
+        # Tags
         api.add_resource(TagListResource, '/tags', endpoint='tags')
+
+        # Tracking
         api.add_resource(TrackingLogResource, '/tracking/<int:parcel_id>', endpoint='tracking_log')
+
+        # Admin
+        api.add_resource(UserListResource, '/admin/users', endpoint='admin_users')
+        api.add_resource(UserRoleUpdateResource, '/admin/users/<int:user_id>', endpoint='admin_user_update')
+        api.add_resource(AssignAgentResource, '/admin/assign', endpoint='assign_agent')
+
+
+# Register
+        api.add_resource(AgentDeliveryListResource, '/agent/deliveries', endpoint='agent_deliveries')
+        api.add_resource(AgentDeliveryUpdateResource, '/agent/deliveries/<int:parcel_id>', endpoint='agent_delivery_update')
 
         print("✅ Routes registered")
 
