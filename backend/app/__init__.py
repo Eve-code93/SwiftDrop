@@ -1,23 +1,17 @@
 import os
 import logging
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_jwt_extended import JWTManager
-from flask_restful import Api
 from logging.handlers import RotatingFileHandler
 
 from config import Config, DevelopmentConfig, ProductionConfig, TestingConfig
+from app.extensions import db, migrate, jwt, api
 
-db = SQLAlchemy()
-migrate = Migrate()
-jwt = JWTManager()
-api = Api()
 
 def create_app(config_class=Config):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config_class)
 
+    # Optional engine optimizations
     app.config.setdefault('SQLALCHEMY_ENGINE_OPTIONS', {
         'pool_size': 10,
         'max_overflow': 20,
@@ -25,28 +19,51 @@ def create_app(config_class=Config):
         'pool_recycle': 300,
     })
 
+    # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
     api.init_app(app)
 
+    # Register resources
     register_resources(app)
+    
+    # Configure logging
     configure_logging(app)
 
+    # Shell context for Flask CLI
     from app.models.user import User
-    app.shell_context_processor(lambda: {'db': db, 'User': User})
+    from app.models.parcel import Parcel
+    from app.models.tracking_log import TrackingLog
+    from app.models.tag import Tag
+    from app.models.parcel_tag import ParcelTag
+
+    app.shell_context_processor(lambda: {
+        'db': db,
+        'User': User,
+        'Parcel': Parcel,
+        'TrackingLog': TrackingLog,
+        'Tag': Tag,
+        'ParcelTag': ParcelTag
+    })
 
     return app
 
+
 def register_resources(app):
     from app.resources.auth import Register, Login
+    from app.resources.parcel import ParcelListResource, ParcelResource
+    from app.resources.tag import TagListResource
+    from app.resources.tracking_log import TrackingLogResource
+
     with app.app_context():
-        try:
-            api.add_resource(Register, '/auth/register')
-            api.add_resource(Login, '/auth/login')
-        except Exception as e:
-            app.logger.error(f"Failed to register resources: {str(e)}")
-            raise
+        api.add_resource(Register, '/auth/register')
+        api.add_resource(Login, '/auth/login')
+        api.add_resource(ParcelListResource, '/parcels')
+        api.add_resource(ParcelResource, '/parcels/<int:parcel_id>')
+        api.add_resource(TagListResource, '/tags')
+        api.add_resource(TrackingLogResource, '/tracking/<int:parcel_id>')
+
 
 def configure_logging(app):
     if not app.debug and not app.testing:
