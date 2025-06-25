@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 
+
 function Home() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -36,11 +37,12 @@ function Home() {
             placeholder="Enter your tracking number"
             className="w-full md:w-2/3 p-3 border border-gray-300 rounded-md shadow-sm focus:outline-blue-400"
           />
+          {/* <Link to={`/parcels/${parcel.id}`}>Track Parcel</Link> */}
         </div>
 
         <div className="md:w-1/2 mb-10 md:mb-0">
           <img
-            src="/src/assets/Heropic.png" 
+            src="/src/assets/Heropic.png"
             alt="Delivery Illustration"
             className="w-full max-w-md mx-auto"
           />
