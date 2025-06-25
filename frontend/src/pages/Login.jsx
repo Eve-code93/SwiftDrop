@@ -1,16 +1,18 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Simple client-side validation
     if (!email || !password) {
       setError("Please fill in all fields");
       return;
@@ -18,9 +20,30 @@ function Login() {
 
     setError("");
 
-  
+    try {
+      // TODO: Replace this with actual API call later
+      const mockResponse = {
+        user: {
+          id: 1,
+          name: "Edwin",
+          password: "password123",
+          email: "edwin@example.com",
+          role: "user", // Change to 'agent' or 'admin' to test other dashboards
+        },
+        token: "mock-token",
+      };
 
-    // TODO: Send login data to backend
+      // Save to auth context
+      login(mockResponse);
+
+      // Redirect based on role
+      const role = mockResponse.user.role;
+      if (role === "admin") navigate("/admin");
+      else if (role === "agent") navigate("/agent");
+      else navigate("/dashboard");
+    } catch (err) {
+      setError("Login failed. Please try again.");
+    }
   };
 
   return (

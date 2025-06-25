@@ -20,11 +20,11 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = (token) => {
+  const login = ({ user, token }) => {
+    setUser(user);
     localStorage.setItem("token", token);
-    const decoded = jwtDecode(token);
-    setUser(decoded);
   };
+  
 
   const logout = () => {
     localStorage.removeItem("token");
