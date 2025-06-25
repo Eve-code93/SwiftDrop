@@ -1,44 +1,46 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-function Login() {
+function ForgotPassword() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Simple client-side validation
-    if (!email || !password) {
-      setError("Please fill in all fields");
+    if (!email) {
+      setError("Please enter your email");
       return;
     }
 
     setError("");
+    setMessage("If this email exists, reset instructions have been sent.");
 
-  
-
-    // TODO: Send login data to backend
+    // TODO: Connect to backend password reset request
+    console.log("Password reset requested for:", email);
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4 py-8">
       <div className="inline-flex mb-4">
-        <Link to="/" className="inline-flex flex-row items-center">
+        <a href="#" className="inline-flex flex-row items-center">
           <span className="leading-10 text-gray-800 text-4xl font-bold ml-1 uppercase">
             SwiftDrop
           </span>
-        </Link>
+        </a>
       </div>
 
       <div className="text-sm sm:text-base text-gray-600 my-4">
-        Login to your account
+        Forgot your password? Reset it here.
       </div>
 
       <div className="rounded-md bg-white w-full max-w-sm sm:max-w-md border border-gray-200 shadow-md px-4 py-6 sm:p-8">
         {error && (
           <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
+        )}
+        {message && (
+          <p className="text-green-600 text-sm mb-4 text-center">{message}</p>
         )}
 
         <form onSubmit={handleSubmit}>
@@ -47,7 +49,7 @@ function Login() {
               htmlFor="email"
               className="mb-1 text-xs sm:text-sm tracking-wide text-gray-600"
             >
-              Email:
+              Enter your registered email
             </label>
             <div className="relative">
               <input
@@ -56,26 +58,7 @@ function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="text-sm sm:text-base placeholder-gray-500 pl-3 pr-4 rounded-lg border border-gray-400 w-full py-2 focus:outline-none focus:border-indigo-400"
-                placeholder="Enter email"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col mb-4">
-            <label
-              htmlFor="password"
-              className="mb-1 text-xs sm:text-sm tracking-wide text-gray-600"
-            >
-              Password:
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="text-sm sm:text-base placeholder-gray-500 pl-3 pr-4 rounded-lg border border-gray-400 w-full py-2 focus:outline-none focus:border-indigo-400"
-                placeholder="Enter password"
+                placeholder="example@domain.com"
               />
             </div>
           </div>
@@ -85,7 +68,7 @@ function Login() {
               type="submit"
               className="flex items-center justify-center focus:outline-none text-white text-sm sm:text-base bg-indigo-600 hover:bg-indigo-700 rounded py-2 w-full transition duration-150 ease-in"
             >
-              <span className="mr-2 uppercase">Login</span>
+              <span className="mr-2 uppercase">Send Reset Link</span>
               <span>
                 <svg
                   className="h-6 w-6"
@@ -96,7 +79,7 @@ function Login() {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path d="M5 12h14M12 5l7 7-7 7" />
+                  <path d="M4 4v16h16V4H4zm4 4h8v2H8V8zm0 4h6v2H8v-2z" />
                 </svg>
               </span>
             </button>
@@ -106,7 +89,7 @@ function Login() {
 
       <div className="flex justify-center items-center mt-6">
         <Link
-          to="/register"
+          to="/login"
           className="inline-flex items-center font-bold text-indigo-500 hover:text-indigo-700 text-sm text-center"
         >
           <span>
@@ -119,33 +102,14 @@ function Login() {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path d="M12 4v16m8-8H4" />
+              <path d="M3 12h18M12 5l7 7-7 7" />
             </svg>
           </span>
-          <span className="ml-2">Don't have an account? Register</span>
-        </Link>
-        <Link
-          to="/forgot-password"
-          className="ml-4 inline-flex items-center font-bold text-indigo-500 hover:text-indigo-700 text-sm text-center"
-        >
-          <span>
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path d="M12 4v16m8-8H4" />
-            </svg>
-          </span>
-          <span className="ml-2">Forgot Password?</span>
+          <span className="ml-2">Back to Login</span>
         </Link>
       </div>
     </div>
   );
 }
 
-export default Login;
+export default ForgotPassword;
