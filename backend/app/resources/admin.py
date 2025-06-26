@@ -4,7 +4,7 @@ from app.models.user import User
 from app.models.parcel import Parcel
 from app.extensions import db
 from app.utils.decorators import role_required
-
+from flask_jwt_extended import jwt_required
 class UserListResource(Resource):
     @role_required("admin")
     def get(self):
@@ -35,3 +35,19 @@ class AssignAgentResource(Resource):
         parcel.agent_id = agent.id
         db.session.commit()
         return {"message": f"Agent {agent.email} assigned to Parcel {parcel.id}"}, 200
+class AdminMetricsResource(Resource):
+     
+    @jwt_required()
+    @role_required('admin')
+    def get(self):
+        total = Parcel.query.count()
+        delivered = Parcel.query.filter_by(status="Delivered").count()
+        in_transit = Parcel.query.filter_by(status="In Transit").count()
+        pending = Parcel.query.filter_by(status="Pending").count()
+
+        return {
+            "total_parcels": total,
+            "delivered": delivered,
+            "in_transit": in_transit,
+            "pending": pending
+        }, 200

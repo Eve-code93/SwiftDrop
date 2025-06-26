@@ -59,9 +59,12 @@ def register_resources(api):
         from app.resources.auth import Register, Login
         from app.resources.parcel import ParcelListResource, ParcelResource
         from app.resources.tag import TagListResource
-        from app.resources.tracking_log import TrackingLogResource
+        # Remove this line: from app.resources.tracking_log import TrackingLogResource
         from app.resources.admin import UserListResource, UserRoleUpdateResource, AssignAgentResource
         from app.resources.agent import AgentDeliveryListResource, AgentDeliveryUpdateResource
+        from app.resources.admin import AdminMetricsResource
+        from app.resources.tracking_log import TrackingLogListResource, ParcelTrackingResource
+
         print("✔ All resources imported")
 
         # Auth
@@ -75,23 +78,24 @@ def register_resources(api):
         # Tags
         api.add_resource(TagListResource, '/tags', endpoint='tags')
 
-        # Tracking
-        api.add_resource(TrackingLogResource, '/tracking/<int:parcel_id>', endpoint='tracking_log')
+        # Remove this line: api.add_resource(TrackingLogResource, '/tracking/<int:parcel_id>', endpoint='tracking_log')
 
         # Admin
         api.add_resource(UserListResource, '/admin/users', endpoint='admin_users')
         api.add_resource(UserRoleUpdateResource, '/admin/users/<int:user_id>', endpoint='admin_user_update')
         api.add_resource(AssignAgentResource, '/admin/assign', endpoint='assign_agent')
-
-
-# Register
+        api.add_resource(AdminMetricsResource, '/admin/metrics')
+        
+        # Agent
         api.add_resource(AgentDeliveryListResource, '/agent/deliveries', endpoint='agent_deliveries')
         api.add_resource(AgentDeliveryUpdateResource, '/agent/deliveries/<int:parcel_id>', endpoint='agent_delivery_update')
-
+        
+        api.add_resource(TrackingLogListResource, '/tracking-logs')  # Optional, admin-only
+        api.add_resource(ParcelTrackingResource, '/parcels/<int:parcel_id>/tracking')
         print("✅ Routes registered")
-
     except Exception as e:
         print(f"❌ Failed to register resources: {e}")
+
 
 
 def configure_logging(app):

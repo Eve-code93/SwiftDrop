@@ -1,3 +1,5 @@
+# app/resources/tracking_log.py
+
 from flask_restful import Resource
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -11,16 +13,36 @@ from app.utils.decorators import role_required, agent_required
 tracking_log_schema = TrackingLogSchema()
 tracking_logs_schema = TrackingLogSchema(many=True)
 
+
+# ✅ For admin or debugging: view all logs
 class TrackingLogListResource(Resource):
     @jwt_required()
+    @role_required("admin")
     def get(self):
-        return tracking_logs_schema.dump(TrackingLog.query.all()), 200
+        logs = TrackingLog.query.all()
+        return tracking_logs_schema.dump(logs), 200
+
+
+# ✅ For individual parcel logs
+class ParcelTrackingResource(Resource):
+    @jwt_required()
+    def get(self, parcel_id):
+        user = User.query.get(get_jwt_identity())
+        parcel = Parcel.query.get_or_404(parcel_id)
+
+        # Allow admin or parcel sender
+        if user.role != 'admin' and parcel.sender_id != user.id:
+            return {"message": "Access denied"}, 403
+
+        logs = TrackingLog.query.filter_by(parcel_id=parcel_id).all()
+        return tracking_logs_schema.dump(logs), 200
 
     @jwt_required()
-    def post(self):
+    @agent_required
+    def post(self, parcel_id):
         data = request.get_json()
         new_log = TrackingLog(
-            parcel_id=data.get("parcel_id"),
+            parcel_id=parcel_id,
             status=data.get("status"),
             location=data.get("location")
         )
@@ -28,34 +50,7 @@ class TrackingLogListResource(Resource):
         db.session.commit()
         return tracking_log_schema.dump(new_log), 201
 
-
-class TrackingLogResource(Resource):
     @jwt_required()
-    def get(self, parcel_id):
-        user = User.query.get(get_jwt_identity())
-        parcel = Parcel.query.get_or_404(parcel_id)
-
-        if user.role != 'admin' and parcel.sender_id != user.id:
-            return {"message": "Access denied"}, 403
-
-        logs = TrackingLog.query.filter_by(parcel_id=parcel_id).all()
-        return tracking_logs_schema.dump(logs), 200
-
-    @agent_required
-    def put(self, parcel_id):
-        parcel = Parcel.query.get_or_404(parcel_id)
-        data = request.get_json()
-
-        # Append new log
-        log = TrackingLog(
-            parcel_id=parcel.id,
-            status=data.get("status"),
-            location=data.get("location")
-        )
-        db.session.add(log)
-        db.session.commit()
-        return tracking_log_schema.dump(log), 200
-
     @role_required("admin")
     def delete(self, parcel_id):
         logs = TrackingLog.query.filter_by(parcel_id=parcel_id).all()

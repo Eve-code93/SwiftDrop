@@ -51,3 +51,15 @@ class ParcelResource(Resource):
         db.session.commit()
         return {"message": "Parcel deleted"}, 204
 
+    @jwt_required()
+    @role_required("admin")
+    def put(self, parcel_id):
+        parcel = Parcel.query.get_or_404(parcel_id)
+        data = request.get_json()
+        
+        parcel.description = data.get("description", parcel.description)
+        parcel.status = data.get("status", parcel.status)
+        parcel.receiver_id = data.get("receiver_id", parcel.receiver_id)
+
+        db.session.commit()
+        return parcel_schema.dump(parcel), 200
