@@ -1,17 +1,24 @@
+# app/__init__.py
+
 import os
 import logging
-from flask import Flask
 from logging.handlers import RotatingFileHandler
-
-from config import Config, DevelopmentConfig, ProductionConfig, TestingConfig
-from app.extensions import db, migrate, jwt, api
-
+from flask import Flask
+from flask_restful import Api
+from config import Config
+from app.extensions import init_extensions, db
+from app.models.user import User
+from app.models.parcel import Parcel
+from app.models.tracking_log import TrackingLog
+from app.models.tag import Tag
+from app.models.parcel_tag import ParcelTag
 
 def create_app(config_class=Config):
+    """Application factory to create and configure the Flask app"""
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config_class)
 
-    # Optional engine optimizations
+    # SQLAlchemy tuning (optional)
     app.config.setdefault('SQLALCHEMY_ENGINE_OPTIONS', {
         'pool_size': 10,
         'max_overflow': 20,
@@ -20,60 +27,102 @@ def create_app(config_class=Config):
     })
 
     # Initialize extensions
-    db.init_app(app)
-    migrate.init_app(app, db)
-    jwt.init_app(app)
-    api.init_app(app)
+    init_extensions(app)
 
-    # Register resources
-    register_resources(app)
-    
-    # Configure logging
+    # Set up Flask-RESTful API and register resources
+    api = Api(app)
+    register_resources(api)
+
+    # Configure production logging
     configure_logging(app)
 
-    # Shell context for Flask CLI
-    from app.models.user import User
-    from app.models.parcel import Parcel
-    from app.models.tracking_log import TrackingLog
-    from app.models.tag import Tag
-    from app.models.parcel_tag import ParcelTag
+    # Register shell context
+    setup_shell_context(app)
 
-    app.shell_context_processor(lambda: {
-        'db': db,
-        'User': User,
-        'Parcel': Parcel,
-        'TrackingLog': TrackingLog,
-        'Tag': Tag,
-        'ParcelTag': ParcelTag
-    })
+    # Debug route to view all registered routes
+    @app.route("/__debug__/routes")
+    def show_routes():
+        output = []
+        for rule in app.url_map.iter_rules():
+            methods = ",".join(sorted(rule.methods))
+            output.append(f"{rule.endpoint:25s} {methods:20s} {str(rule)}")
+        return "<pre>" + "\n".join(output) + "</pre>"
 
     return app
 
 
-def register_resources(app):
-    from app.resources.auth import Register, Login
-    from app.resources.parcel import ParcelListResource, ParcelResource
-    from app.resources.tag import TagListResource
-    from app.resources.tracking_log import TrackingLogResource
+def register_resources(api):
+    """Register all API resources/endpoints"""
+    print("📦 Registering resources...")
 
-    with app.app_context():
-        api.add_resource(Register, '/auth/register')
-        api.add_resource(Login, '/auth/login')
-        api.add_resource(ParcelListResource, '/parcels')
-        api.add_resource(ParcelResource, '/parcels/<int:parcel_id>')
-        api.add_resource(TagListResource, '/tags')
-        api.add_resource(TrackingLogResource, '/tracking/<int:parcel_id>')
+    try:
+        from app.resources.auth import Register, Login
+        from app.resources.parcel import ParcelListResource, ParcelResource
+        from app.resources.tag import TagListResource
+        from app.resources.tracking_log import TrackingLogResource
+        from app.resources.admin import UserListResource, UserRoleUpdateResource, AssignAgentResource
+        from app.resources.agent import AgentDeliveryListResource, AgentDeliveryUpdateResource
+        print("✔ All resources imported")
+
+        # Auth
+        api.add_resource(Register, '/auth/register', endpoint='register')
+        api.add_resource(Login, '/auth/login', endpoint='login')
+
+        # Parcel
+        api.add_resource(ParcelListResource, '/parcels', endpoint='parcel_list')
+        api.add_resource(ParcelResource, '/parcels/<int:parcel_id>', endpoint='parcel_detail')
+
+        # Tags
+        api.add_resource(TagListResource, '/tags', endpoint='tags')
+
+        # Tracking
+        api.add_resource(TrackingLogResource, '/tracking/<int:parcel_id>', endpoint='tracking_log')
+
+        # Admin
+        api.add_resource(UserListResource, '/admin/users', endpoint='admin_users')
+        api.add_resource(UserRoleUpdateResource, '/admin/users/<int:user_id>', endpoint='admin_user_update')
+        api.add_resource(AssignAgentResource, '/admin/assign', endpoint='assign_agent')
+
+
+# Register
+        api.add_resource(AgentDeliveryListResource, '/agent/deliveries', endpoint='agent_deliveries')
+        api.add_resource(AgentDeliveryUpdateResource, '/agent/deliveries/<int:parcel_id>', endpoint='agent_delivery_update')
+
+        print("✅ Routes registered")
+
+    except Exception as e:
+        print(f"❌ Failed to register resources: {e}")
 
 
 def configure_logging(app):
+    """Configure log file output for production"""
     if not app.debug and not app.testing:
-        if not os.path.exists('logs'):
-            os.mkdir('logs')
-        file_handler = RotatingFileHandler('logs/swiftdrop.log', maxBytes=10240, backupCount=10)
+        log_dir = 'logs'
+        os.makedirs(log_dir, exist_ok=True)
+
+        file_handler = RotatingFileHandler(
+            os.path.join(log_dir, 'swiftdrop.log'),
+            maxBytes=10240,
+            backupCount=10
+        )
         file_handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
         ))
         file_handler.setLevel(logging.INFO)
         app.logger.addHandler(file_handler)
         app.logger.setLevel(logging.INFO)
-        app.logger.info('SwiftDrop startup')
+        app.logger.info('SwiftDrop application started')
+
+
+def setup_shell_context(app):
+    """Register models for flask shell"""
+    @app.shell_context_processor
+    def make_shell_context():
+        return {
+            'db': db,
+            'User': User,
+            'Parcel': Parcel,
+            'TrackingLog': TrackingLog,
+            'Tag': Tag,
+            'ParcelTag': ParcelTag
+        }
