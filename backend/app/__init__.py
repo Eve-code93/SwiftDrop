@@ -1,10 +1,9 @@
-# app/__init__.py
-
 import os
 import logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask
 from flask_restful import Api
+from flask_cors import CORS  # Import CORS
 from config import Config
 from app.extensions import init_extensions, db
 from app.models.user import User
@@ -20,6 +19,9 @@ def create_app(config_class=Config):
     """Application factory to create and configure the Flask app"""
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config_class)
+
+    # Initialize CORS with default settings (allow all origins)
+    CORS(app)
 
     # SQLAlchemy tuning (optional)
     app.config.setdefault('SQLALCHEMY_ENGINE_OPTIONS', {
@@ -41,6 +43,27 @@ def create_app(config_class=Config):
 
     # Register shell context
     setup_shell_context(app)
+
+    # Root endpoint
+    @app.route('/')
+    def home():
+        return {
+            "message": "SwiftDrop API",
+            "status": "running",
+            "endpoints": {
+                "auth": ["/auth/register", "/auth/login"],
+                "parcels": "/parcels",
+                "admin": "/admin/users"
+            }
+        }
+
+    # Health check endpoint (required for Render)
+    @app.route('/health')
+    def health_check():
+        return {
+            "status": "healthy",
+            "database": "connected" if db.engine else "disconnected"
+        }, 200
 
     # Debug route to view all registered routes
     @app.route("/__debug__/routes")
