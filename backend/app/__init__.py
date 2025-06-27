@@ -13,6 +13,9 @@ from app.models.tracking_log import TrackingLog
 from app.models.tag import Tag
 from app.models.parcel_tag import ParcelTag
 
+# Create logger at module level
+logger = logging.getLogger(__name__)
+
 def create_app(config_class=Config):
     """Application factory to create and configure the Flask app"""
     app = Flask(__name__, instance_relative_config=True)
@@ -53,19 +56,18 @@ def create_app(config_class=Config):
 
 def register_resources(api):
     """Register all API resources/endpoints"""
-    print("📦 Registering resources...")
+    logger.info("Registering resources...")
 
     try:
         from app.resources.auth import Register, Login
         from app.resources.parcel import ParcelListResource, ParcelResource
         from app.resources.tag import TagListResource
-        # Remove this line: from app.resources.tracking_log import TrackingLogResource
         from app.resources.admin import UserListResource, UserRoleUpdateResource, AssignAgentResource
         from app.resources.agent import AgentDeliveryListResource, AgentDeliveryUpdateResource
         from app.resources.admin import AdminMetricsResource
         from app.resources.tracking_log import TrackingLogListResource, ParcelTrackingResource
 
-        print("✔ All resources imported")
+        logger.info("All resources imported successfully")
 
         # Auth
         api.add_resource(Register, '/auth/register', endpoint='register')
@@ -78,8 +80,6 @@ def register_resources(api):
         # Tags
         api.add_resource(TagListResource, '/tags', endpoint='tags')
 
-        # Remove this line: api.add_resource(TrackingLogResource, '/tracking/<int:parcel_id>', endpoint='tracking_log')
-
         # Admin
         api.add_resource(UserListResource, '/admin/users', endpoint='admin_users')
         api.add_resource(UserRoleUpdateResource, '/admin/users/<int:user_id>', endpoint='admin_user_update')
@@ -90,20 +90,32 @@ def register_resources(api):
         api.add_resource(AgentDeliveryListResource, '/agent/deliveries', endpoint='agent_deliveries')
         api.add_resource(AgentDeliveryUpdateResource, '/agent/deliveries/<int:parcel_id>', endpoint='agent_delivery_update')
         
-        api.add_resource(TrackingLogListResource, '/tracking-logs')  # Optional, admin-only
+        api.add_resource(TrackingLogListResource, '/tracking-logs')
         api.add_resource(ParcelTrackingResource, '/parcels/<int:parcel_id>/tracking')
-        print("✅ Routes registered")
+        
+        logger.info("Routes successfully registered")
     except Exception as e:
-        print(f"❌ Failed to register resources: {e}")
-
+        logger.error(f"Failed to register resources: {str(e)}", exc_info=True)
+        raise  # Re-raise the exception after logging
 
 
 def configure_logging(app):
     """Configure log file output for production"""
     if not app.debug and not app.testing:
+        # Remove existing handlers if any
+        for handler in app.logger.handlers[:]:
+            app.logger.removeHandler(handler)
+        
+        # Configure console logging (for Render)
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+        ))
+        app.logger.addHandler(console_handler)
+        
+        # Optional: File logging (only if you need persistent logs)
         log_dir = 'logs'
         os.makedirs(log_dir, exist_ok=True)
-
         file_handler = RotatingFileHandler(
             os.path.join(log_dir, 'swiftdrop.log'),
             maxBytes=10240,
@@ -114,6 +126,7 @@ def configure_logging(app):
         ))
         file_handler.setLevel(logging.INFO)
         app.logger.addHandler(file_handler)
+        
         app.logger.setLevel(logging.INFO)
         app.logger.info('SwiftDrop application started')
 
