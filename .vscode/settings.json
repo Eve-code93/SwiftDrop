@@ -1,0 +1,13 @@
+{
+    "python.analysis.extraPaths": [
+        "./backend"
+    ]
+}
+{
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingImports": "none"
+  },
+  "python.analysis.exclude": [
+    "**/site-packages/sqlalchemy/**"
+  ]
+}
