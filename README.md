@@ -17,24 +17,26 @@ Parcel tracking
 ❤️ Health Check:
 
 bash
-Copy
-Edit
 curl https://swiftdrop-xh7v.onrender.com/health
+
+
 📁 Project Structure
 bash
 Copy
 Edit
 backend/
 ├── app/
-│   ├── models/           # SQLAlchemy models (User, Parcel, etc.)
-│   ├── schemas/          # Marshmallow schemas
-│   ├── resources/        # Flask-RESTful route handlers
-│   ├── utils/            # JWT + Role decorators
-│   ├── extensions.py     # Extensions (db, jwt, ma, migrate)
-│   └── __init__.py       # App factory + route registration
-├── run.py                # App entry point
-├── requirements.txt      # All dependencies
-├── .env                  # Environment variables
+│    models/           # SQLAlchemy models (User, Parcel, etc.)
+│    schemas/          # Marshmallow schemas
+│    resources/        # Flask-RESTful route handlers
+│    utils/            # JWT + Role decorators
+│    extensions.py     # Extensions (db, jwt, ma, migrate)
+│    __init__.py       # App factory + route registration
+├    run.py                # App entry point
+     requirements.txt      # All dependencies
+─ .env                  # Environment variables
+
+
 🧰 Tech Stack
 Python 3.12
 
