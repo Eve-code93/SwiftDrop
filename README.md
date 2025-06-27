@@ -1,41 +1,30 @@
 
-SwiftDrop is a parcel delivery backend system built with Flask, providing endpoints for:
+# 🚚 SwiftDrop — Parcel Delivery API (Flask)
 
-User registration & authentication
+SwiftDrop is a backend REST API for managing parcel deliveries. It enables user registration, authentication, agent tracking, parcel creation, and admin-level operations. Built with **Flask**, it follows a modular structure and secure authentication using JWT.
 
-Admin management
+---
 
-Agent delivery updates
+## 🚀 Live Deployment
 
-Parcel tracking
-
-🚀 Live Deployment
-🌐 Base URL: https://swiftdrop-xh7v.onrender.com
-
-📜 API Docs (routes): /__debug__/routes
-
-❤️ Health Check:
-
-bash
-curl https://swiftdrop-xh7v.onrender.com/health
-
-
-## 📁 Project Structure
+- **🌐 Base URL:** [https://swiftdrop-xh7v.onrender.com](https://swiftdrop-xh7v.onrender.com)
+- **📜 API Docs (Debug Route):** `/__debug__/routes`
+- **❤️ Health Check:**
 
 ```bash
+curl https://swiftdrop-xh7v.onrender.com/health
+📁 Project Structure
 backend/
 ├── app/
 │   ├── models/           # SQLAlchemy models (User, Parcel, etc.)
-│   ├── schemas/          # Marshmallow schemas
-│   ├── resources/        # Flask-RESTful route handlers
-│   ├── utils/            # JWT + Role decorators
-│   ├── extensions.py     # Extensions (db, jwt, ma, migrate)
-│   └── __init__.py       # App factory + route registration
-├── run.py                # App entry point
-├── requirements.txt      # Project dependencies
+│   ├── schemas/          # Marshmallow schemas for validation
+│   ├── resources/        # API route handlers (Flask-RESTful)
+│   ├── utils/            # JWT, role-based access decorators
+│   ├── extensions.py     # App extensions (db, jwt, ma, migrate)
+│   └── __init__.py       # Application factory
+├── run.py                # Entry point
+├── requirements.txt      # Python dependencies
 ├── .env                  # Environment variables
-
-
 🧰 Tech Stack
 Python 3.12
 
@@ -53,117 +42,114 @@ Flask-Marshmallow
 
 PostgreSQL
 
-Render for Deployment
+Render (for deployment)
 
-🔐 Authentication
-🔸 Register
-http
-Copy
-Edit
+🔐 Authentication & Roles
+Register
 POST /auth/register
-json
-Copy
-Edit
 {
+Request Body:
   "username": "admin1",
   "email": "admin@example.com",
   "password": "adminpass",
   "role": "admin"
 }
-🔸 Login
-http
-Copy
-Edit
+Login
 POST /auth/login
-json
-Copy
-Edit
+Request Body:
 {
   "email": "admin@example.com",
   "password": "adminpass"
 }
-Returns:
-
-json
-Copy
-Edit
+Response:
 {
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR..."
+  "access_token": "your.jwt.token"
 }
 🔓 Roles
-admin: Manage users, assign agents, see metrics
+Role	Description
+Admin	Manage users, assign agents, view system metrics
+Sender	Create and track parcels
+Agent	Update delivery status, view assigned parcels
 
-sender: Create/view parcels
+🔀 API Endpoints
+🟢 Public
+POST /auth/register — Register a new user
 
-agent: Update delivery status and tracking logs
+POST /auth/login — Login and receive JWT token
 
-🔀 API Endpoints Overview
-Role	Method	Endpoint	Description
-Public	POST	/auth/register	Register new user
-Public	POST	/auth/login	Login & get token
-Admin	GET	/admin/users	View all users
-Admin	PUT	/admin/users/<user_id>	Update user role
-Admin	POST	/admin/assign	Assign agent to parcel
-Admin	GET	/admin/metrics	View parcel delivery stats
-Sender	POST	/parcels	Create a new parcel
-All	GET	/parcels	List all parcels
-All	GET	/parcels/<id>	Parcel details
-Admin	PUT	/parcels/<id>	Update parcel
-All	GET	/parcels/<id>/tracking	Parcel tracking logs
-Agent	POST	/parcels/<id>/tracking	Add tracking log
-Admin	DELETE	/parcels/<id>/tracking	Delete all logs
-Agent	GET	/agent/deliveries	View assigned parcels
-Agent	PUT	/agent/deliveries/<parcel_id>	Update delivery status
-All	GET	/tags	List tags
-Admin	POST	/tags	Create new tag
-Admin	GET	/tracking-logs	View all logs (admin only)
+🔵 Admin Only
+GET /admin/users — View all users
 
-🔧 Example with curl
-✅ Create Parcel (as sender)
-bash
-Copy
-Edit
+PUT /admin/users/<user_id> — Update a user’s role
+
+POST /admin/assign — Assign agent to a parcel
+
+GET /admin/metrics — View parcel delivery statistics
+
+DELETE /parcels/<id>/tracking — Delete all tracking logs
+
+POST /tags — Create a new tag
+
+GET /tracking-logs — View all tracking logs
+
+🟠 Sender
+POST /parcels — Create a new parcel
+
+🟡 Agent
+GET /agent/deliveries — View assigned deliveries
+
+PUT /agent/deliveries/<parcel_id> — Update delivery status
+
+POST /parcels/<id>/tracking — Add a tracking log
+
+🟣 All Authenticated Users
+GET /parcels — List all parcels
+
+GET /parcels/<id> — View parcel details
+
+GET /parcels/<id>/tracking — View tracking logs
+
+PUT /parcels/<id> — Update parcel (admin only)
+
+GET /tags — List tags
+🧪 Example Usage with curl
+Create a Parcel (as Sender)
 curl -X POST https://swiftdrop-xh7v.onrender.com/parcels \
-  -H "Authorization: Bearer YOUR_JWT" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"description": "Phone", "sender_id": 1}'
-🧪 Testing Suggestions
-Test all routes with Postman or curl
+🧪 Testing Tips
+Use Postman or curl to test endpoints
 
-Use sample users for different roles
+Log in as different roles (admin, sender, agent)
 
-Validate:
+Confirm:
 
-JWT protection works
+JWT token protection is enforced
 
-Admin-only/Agent-only routes are secure
+Role-based access control works
 
-Proper error messages on bad input
-
+Errors return clear, informative messages
 ✅ Deployment Notes
 Platform: Render
 
-DB: PostgreSQL (Cloud)
+Database: PostgreSQL (cloud-hosted)
 
-.env should contain:
-
-env
-Copy
-Edit
+.env Example
 FLASK_APP=run.py
 SQLALCHEMY_DATABASE_URI=postgresql://user:password@host:5432/dbname?options=-csearch_path=swiftdrop_schema
-JWT_SECRET_KEY=your-secret
-📌 Future Improvements
-Add /auth/reset-password
+JWT_SECRET_KEY=your-secret-key
+📌 Future Enhancements
+Add /auth/reset-password endpoint
 
-Paginate parcels
+Implement pagination for parcel listings
 
-Swagger or ReDoc API docs
+Generate Swagger or ReDoc API documentation
 
-Write unit tests with pytest
+Add unit tests using pytest
 
-👨‍💻 Developer
+👩🏽‍💻 Developer
 Evelyne Joseph
-🚀 Software Developer | Django | Flask | API | PostgreSQL
+🚀 Software Developer — Django | Flask | API | PostgreSQL
 📧 evelynejose1993@gmail.com
 🔗 GitHub: Eve-code93
