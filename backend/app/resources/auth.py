@@ -32,6 +32,6 @@ class Login(Resource):
         data = request.get_json()
         user = User.query.filter_by(email=data["email"]).first()
         if user and user.check_password(data["password"]):
-            access_token = create_access_token(identity=user.id, expires_delta=timedelta(hours=2))
+            access_token = create_access_token(identity=user.id, role=user.role, expires_delta=timedelta(hours=2))
             return {"access_token": access_token}, 200
         return {"message": "Invalid credentials"}, 401
