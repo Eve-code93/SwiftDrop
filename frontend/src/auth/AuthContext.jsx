@@ -20,9 +20,14 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = ({ user, token }) => {
-    setUser(user);
-    localStorage.setItem("token", token);
+  const login = ({ token }) => {
+    try {
+      const decoded = jwtDecode(token);
+      setUser(decoded);
+      localStorage.setItem("token", token);
+    } catch (err) {
+      console.error("Failed to decode token:", err);
+    }
   };
   
 

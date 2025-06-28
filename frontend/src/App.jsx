@@ -18,11 +18,11 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/forgot-password/:token" element={<ForgotPassword />} />
       <Route
         path="/dashboard"
         element={
-          <PrivateRoute allowedRoles={["user"]}>
+          <PrivateRoute allowedRoles={["sender"]}>
             <Dashboard />
           </PrivateRoute>
         }
@@ -46,7 +46,7 @@ function App() {
       <Route
         path="/parcels/:id"
         element={
-          <PrivateRoute>
+          <PrivateRoute allowedRoles={["user", "admin", "agent"]}>
             <ParcelDetails />
           </PrivateRoute>
         }
@@ -54,7 +54,7 @@ function App() {
       <Route
         path="/parcels/new"
         element={
-          <PrivateRoute>
+          <PrivateRoute allowedRoles={["user"]}>
             <CreateParcel />
           </PrivateRoute>
         }
@@ -62,7 +62,7 @@ function App() {
       <Route
         path="/profile"
         element={
-          <PrivateRoute>
+          <PrivateRoute allowedRoles={["user", "admin", "agent"]}>
             <Profile />
           </PrivateRoute>
         }

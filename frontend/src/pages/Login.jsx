@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import api from "../api/axios";
+import { jwtDecode } from "jwt-decode";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -21,28 +23,25 @@ function Login() {
     setError("");
 
     try {
-      // TODO: Replace this with actual API call later
-      const mockResponse = {
-        user: {
-          id: 1,
-          name: "Edwin",
-          password: "password123",
-          email: "edwin@example.com",
-          role: "user", // Change to 'agent' or 'admin' to test other dashboards
-        },
-        token: "mock-token",
-      };
+      const response = await api.post("/auth/login", { email, password });
 
-      // Save to auth context
-      login(mockResponse);
+      console.log("Login response:", response.data); // 👈 check what you're getting
 
-      // Redirect based on role
-      const role = mockResponse.user.role;
-      if (role === "admin") navigate("/admin");
-      else if (role === "agent") navigate("/agent");
-      else navigate("/dashboard");
+      const { access_token } = response.data;
+
+      const decodedUser = jwtDecode(access_token);
+      console.log("Decoded JWT:", decodedUser); // 👈 check this too
+
+      login({ token: access_token });
+
+      // Redirect based on role from decoded token
+      if (decodedUser.role === "admin") navigate("/admin");
+      else if (decodedUser.role === "agent") navigate("/agent");
+      else if (decodedUser.role === "sender") navigate("/dashboard");
+      else navigate("/");
     } catch (err) {
-      setError("Login failed. Please try again.");
+      console.error("Login failed", err);
+      setError("Invalid email or password. Please try again.");
     }
   };
 
@@ -69,60 +68,56 @@ function Login() {
           <div className="flex flex-col mb-4">
             <label
               htmlFor="email"
-              className="mb-1 text-xs sm:text-sm tracking-wide text-gray-600"
+              className="mb-1 text-xs sm:text-sm text-gray-600"
             >
               Email:
             </label>
-            <div className="relative">
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="text-sm sm:text-base placeholder-gray-500 pl-3 pr-4 rounded-lg border border-gray-400 w-full py-2 focus:outline-none focus:border-indigo-400"
-                placeholder="Enter email"
-              />
-            </div>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="text-sm placeholder-gray-500 pl-3 pr-4 rounded-lg border border-gray-400 w-full py-2 focus:outline-none focus:border-indigo-400"
+              placeholder="Enter email"
+              required
+            />
           </div>
 
           <div className="flex flex-col mb-4">
             <label
               htmlFor="password"
-              className="mb-1 text-xs sm:text-sm tracking-wide text-gray-600"
+              className="mb-1 text-xs sm:text-sm text-gray-600"
             >
               Password:
             </label>
-            <div className="relative">
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="text-sm sm:text-base placeholder-gray-500 pl-3 pr-4 rounded-lg border border-gray-400 w-full py-2 focus:outline-none focus:border-indigo-400"
-                placeholder="Enter password"
-              />
-            </div>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="text-sm placeholder-gray-500 pl-3 pr-4 rounded-lg border border-gray-400 w-full py-2 focus:outline-none focus:border-indigo-400"
+              placeholder="Enter password"
+              required
+            />
           </div>
 
           <div className="flex w-full mt-6">
             <button
               type="submit"
-              className="flex items-center justify-center focus:outline-none text-white text-sm sm:text-base bg-indigo-600 hover:bg-indigo-700 rounded py-2 w-full transition duration-150 ease-in"
+              className="flex items-center justify-center text-white bg-indigo-600 hover:bg-indigo-700 rounded py-2 w-full transition duration-150 ease-in"
             >
               <span className="mr-2 uppercase">Login</span>
-              <span>
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </span>
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                viewBox="0 0 24 24"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
             </button>
           </div>
         </form>
@@ -131,41 +126,15 @@ function Login() {
       <div className="flex justify-center items-center mt-6">
         <Link
           to="/register"
-          className="inline-flex items-center font-bold text-indigo-500 hover:text-indigo-700 text-sm text-center"
+          className="text-indigo-500 hover:text-indigo-700 text-sm font-bold"
         >
-          <span>
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path d="M12 4v16m8-8H4" />
-            </svg>
-          </span>
-          <span className="ml-2">Don't have an account? Register</span>
+          Don’t have an account? Register
         </Link>
         <Link
-          to="/forgot-password"
-          className="ml-4 inline-flex items-center font-bold text-indigo-500 hover:text-indigo-700 text-sm text-center"
+          to="/forgot-password/:token"
+          className="ml-4 text-indigo-500 hover:text-indigo-700 text-sm font-bold"
         >
-          <span>
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path d="M12 4v16m8-8H4" />
-            </svg>
-          </span>
-          <span className="ml-2">Forgot Password?</span>
+          Forgot Password?
         </Link>
       </div>
     </div>
