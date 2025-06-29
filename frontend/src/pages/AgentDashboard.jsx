@@ -13,7 +13,7 @@ function AgentDashboard() {
   useEffect(() => {
     const fetchParcels = async () => {
       try {
-        const response = await api.get("/parcels/assigned");
+        const response = await api.get("/agent/deliveries");
         setParcels(response.data);
       } catch (err) {
         console.error("Failed to fetch parcels:", err);

@@ -18,15 +18,12 @@ function AdminDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch users
         const usersResponse = await axios.get("/admin/users");
         setUsers(usersResponse.data);
 
-        // Fetch parcels
         const parcelsResponse = await axios.get("/parcels");
         setParcels(parcelsResponse.data);
 
-        // Fetch metrics
         const metricsResponse = await axios.get("/admin/metrics");
         setMetrics(metricsResponse.data);
       } catch (error) {
@@ -51,7 +48,7 @@ function AdminDashboard() {
     if (!newRole) return;
 
     try {
-      await axios.put(`/admin/users/${userId}/role`, { role: newRole });
+      await axios.put(`/admin/users/${userId}`, { role: newRole }); // ✅ Fixed URL
       setUsers((prev) =>
         prev.map((user) =>
           user.id === userId ? { ...user, role: newRole } : user
@@ -73,10 +70,11 @@ function AdminDashboard() {
         parcel_id: parcelId,
         agent_id: agentId,
       });
+
       setParcels((prev) =>
         prev.map((parcel) =>
           parcel.id === parcelId
-            ? { ...parcel, assigned_agent: agentId }
+            ? { ...parcel, agent_id: agentId } // ✅ Updated to match backend field
             : parcel
         )
       );
@@ -150,7 +148,7 @@ function AdminDashboard() {
                     className="border px-2 py-1 rounded"
                   >
                     <option value="">Select Role</option>
-                    <option value="user">User</option>
+                    <option value="user">Sender</option>
                     <option value="agent">Agent</option>
                     <option value="admin">Admin</option>
                   </select>
