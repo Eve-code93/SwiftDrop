@@ -110,31 +110,54 @@ function AdminDashboard() {
   return (
     <div className="p-6 space-y-10 bg-gray-50 min-h-screen">
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 text-white px-4 py-2 rounded"
-        >
-          Logout
-        </button>
+      <div className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white p-6 rounded-lg shadow-md mb-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <button
+            onClick={handleLogout}
+            className="bg-white text-red-600 font-semibold px-4 py-2 rounded hover:bg-red-100 transition"
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       {/* Parcel Metrics */}
-      <section className="bg-white p-6 rounded shadow grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <section className="bg-gradient-to-br from-white via-gray-50 to-gray-100 p-6 rounded-xl shadow-lg grid grid-cols-2 sm:grid-cols-4 gap-6">
         {Object.entries(metrics).map(([key, value]) => {
-          const color = {
-            total_parcels: "text-gray-800",
-            delivered: "text-green-600",
-            in_transit: "text-blue-600",
-            pending: "text-yellow-600",
+          const config = {
+            total_parcels: {
+              color: "text-gray-800",
+              icon: "📦",
+              label: "Total Parcels",
+            },
+            delivered: {
+              color: "text-green-600",
+              icon: "✅",
+              label: "Delivered",
+            },
+            in_transit: {
+              color: "text-blue-600",
+              icon: "🚚",
+              label: "In Transit",
+            },
+            pending: {
+              color: "text-yellow-600",
+              icon: "⏳",
+              label: "Pending",
+            },
           }[key];
+
           return (
-            <div key={key} className="text-center">
-              <h3 className="text-sm font-medium text-gray-500 capitalize">
-                {key.replace("_", " ")}
+            <div
+              key={key}
+              className="bg-white rounded-lg shadow-sm p-4 text-center hover:shadow-md transition"
+            >
+              <div className="text-3xl mb-2">{config.icon}</div>
+              <h3 className="text-sm font-medium text-gray-500">
+                {config.label}
               </h3>
-              <p className={`text-2xl font-semibold ${color}`}>{value}</p>
+              <p className={`text-2xl font-bold ${config.color}`}>{value}</p>
             </div>
           );
         })}

@@ -29,17 +29,20 @@ function UserDashboard() {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Navbar */}
-      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
+      <nav className="bg-gradient-to-r from-indigo-600 to-blue-500 px-8 py-4 shadow-md text-white flex justify-between items-center">
+        {/* Brand Logo */}
         <h1
-          className="text-xl font-bold text-indigo-600 cursor-pointer"
+          className="text-2xl font-bold cursor-pointer tracking-wide"
           onClick={() => navigate("/dashboard")}
         >
           SwiftDrop
         </h1>
-        <div className="flex gap-4 items-center text-sm">
+
+        {/* Navigation Links */}
+        <div className="flex space-x-6 text-sm font-medium">
           <button
             onClick={() => navigate("/parcels/new")}
-            className="text-indigo-600 hover:underline"
+            className="hover:underline"
           >
             Send a Parcel
           </button>
@@ -47,7 +50,7 @@ function UserDashboard() {
           {parcels.length > 0 && (
             <button
               onClick={() => navigate(`/parcels/${parcels[0].id}`)}
-              className="text-indigo-600 hover:underline"
+              className="hover:underline"
             >
               Track My Parcel
             </button>
@@ -55,13 +58,14 @@ function UserDashboard() {
 
           <button
             onClick={() => navigate("/profile")}
-            className="text-gray-700 hover:underline"
+            className="hover:underline"
           >
             My Account
           </button>
+
           <button
             onClick={handleLogout}
-            className="text-red-600 font-medium hover:underline"
+            className="hover:underline text-red-100"
           >
             Logout
           </button>
@@ -85,7 +89,7 @@ function UserDashboard() {
           <AccountTile
             title="In Transit"
             value={parcels.filter((p) => p.status === "in_transit").length}
-            icon="src/assets/transit-icon.svg"
+            icon="src/assets/intransit.jpg"
             color="text-blue-600"
           />
         </section>
