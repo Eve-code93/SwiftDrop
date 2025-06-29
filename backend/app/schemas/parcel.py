@@ -1,6 +1,7 @@
-from marshmallow import Schema, fields, post_dump
+from marshmallow import Schema, fields
 from .tag import TagSchema
 from .parcel_tag import ParcelTagSchema
+from .user_schema import UserSchema  # ✅ Make sure this is imported
 
 class ParcelSchema(Schema):
     id = fields.Int(dump_only=True)
@@ -11,4 +12,6 @@ class ParcelSchema(Schema):
     sender_id = fields.Int(required=True)
     receiver_id = fields.Int()
 
+    sender = fields.Nested(UserSchema(only=("id", "email", "name")), dump_only=True)  # ✅ Add this
+    agent = fields.Nested(UserSchema(only=("id", "email", "name")), dump_only=True)   # ✅ Add this
     tags = fields.Nested(ParcelTagSchema, many=True, dump_only=True)
