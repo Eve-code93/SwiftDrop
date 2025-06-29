@@ -39,7 +39,7 @@ function AdminDashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/");
   };
 
   const handleRoleChange = (userId, newRole) => {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios"; // Ensure this handles token automatically
+import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
 
 function CreateParcel() {
@@ -25,7 +25,7 @@ function CreateParcel() {
       await api.post("/parcels", {
         description,
         destination,
-        user_id: user?.id, // If required
+        sender_id: user.id,
       });
 
       setSuccess("Parcel created successfully!");

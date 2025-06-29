@@ -23,7 +23,7 @@ function UserDashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/");
   };
 
   return (
@@ -70,18 +70,18 @@ function UserDashboard() {
           <AccountTile
             title="Total Orders"
             value={parcels.length}
-            icon="src/assets/myorders.png"            
+            icon="src/assets/myorders.png"
           />
           <AccountTile
             title="Delivered"
             value={parcels.filter((p) => p.status === "delivered").length}
-            icon="/assets/delivered-icon.svg"
+            icon="src/assets/profilesettings.png"
             color="text-green-600"
           />
           <AccountTile
             title="In Transit"
             value={parcels.filter((p) => p.status === "in_transit").length}
-            icon="/assets/transit-icon.svg"
+            icon="src/assets/transit-icon.svg"
             color="text-blue-600"
           />
         </section>
