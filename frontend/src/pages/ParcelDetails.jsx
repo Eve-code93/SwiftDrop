@@ -1,35 +1,41 @@
 // src/pages/ParcelDetails.jsx
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import axios from "../api/axios";
 
 function ParcelDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [parcel, setParcel] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    // TODO: Replace this with API call: axios.get(`/api/parcels/${id}`)
-    const dummyData = {
-      id,
-      description: "Gift package to Eldoret",
-      destination: "Eldoret",
-      status: "Delivered",
-      created_at: "2025-06-18",
-      updated_at: "2025-06-22",
-      tracking: [
-        { status: "Created", date: "2025-06-18" },
-        { status: "In Transit", date: "2025-06-20" },
-        { status: "Delivered", date: "2025-06-22" },
-      ],
+    const fetchParcel = async () => {
+      try {
+        const response = await axios.get(`/parcels/${id}`);
+        setParcel(response.data);
+      } catch (err) {
+        setError("Parcel not found or you are not authorized to view it.");
+        console.error(err);
+      }
     };
-    setParcel(dummyData);
+
+    fetchParcel();
   }, [id]);
 
-  if (!parcel) {
-    return <div className="p-6">Loading parcel details...</div>;
-  }
+  if (error) return <div className="p-6 text-red-600">{error}</div>;
+  if (!parcel) return <div className="p-6">Loading parcel details...</div>;
 
   return (
     <div className="p-6">
+      {/* Back to Dashboard Button */}
+      <button
+        onClick={() => navigate("/dashboard")}
+        className="mb-4 text-indigo-600 text-sm hover:underline"
+      >
+        ← Back to Dashboard
+      </button>
+
       <h1 className="text-2xl font-bold mb-2">Parcel #{parcel.id}</h1>
       <p className="text-gray-600 mb-4">{parcel.description}</p>
 
@@ -48,15 +54,19 @@ function ParcelDetails() {
         </p>
       </div>
 
-      <h2 className="text-xl font-semibold mb-2">Tracking History</h2>
-      <ul className="bg-white border rounded shadow-sm divide-y">
-        {parcel.tracking.map((entry, index) => (
-          <li key={index} className="px-4 py-2 flex justify-between">
-            <span>{entry.status}</span>
-            <span className="text-gray-500 text-sm">{entry.date}</span>
-          </li>
-        ))}
-      </ul>
+      {parcel.tracking?.length > 0 && (
+        <>
+          <h2 className="text-xl font-semibold mb-2">Tracking History</h2>
+          <ul className="bg-white border rounded shadow-sm divide-y">
+            {parcel.tracking.map((entry, index) => (
+              <li key={index} className="px-4 py-2 flex justify-between">
+                <span>{entry.status}</span>
+                <span className="text-gray-500 text-sm">{entry.date}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 }
