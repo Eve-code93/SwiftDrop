@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        setUser(decoded);
+        setUser({ token, ...decoded });
       } catch (error) {
         console.error("Invalid token");
         localStorage.removeItem("token");
@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
   const login = ({ token }) => {
     try {
       const decoded = jwtDecode(token);
-      setUser(decoded);
+      setUser({ token, ...decoded });    // On reload keep data in localStorage
       localStorage.setItem("token", token);
     } catch (err) {
       console.error("Failed to decode token:", err);

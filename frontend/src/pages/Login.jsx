@@ -25,14 +25,11 @@ function Login() {
     try {
       const response = await api.post("/auth/login", { email, password });
 
-      console.log("Login response:", response.data); // 👈 check what you're getting
-
+      
       const { access_token } = response.data;
 
       const decodedUser = jwtDecode(access_token);
-      console.log("Decoded JWT:", decodedUser); // 👈 check this too
-      console.log("User role from token:", decodedUser.role); // 👈 Add this
-
+     
       login({ token: access_token });
 
       // Redirect based on role from decoded token

@@ -46,7 +46,7 @@ function App() {
       <Route
         path="/parcels/:id"
         element={
-          <PrivateRoute allowedRoles={["user", "admin", "agent"]}>
+          <PrivateRoute allowedRoles={["sender", "admin", "agent"]}>
             <ParcelDetails />
           </PrivateRoute>
         }
@@ -54,7 +54,7 @@ function App() {
       <Route
         path="/parcels/new"
         element={
-          <PrivateRoute allowedRoles={["user"]}>
+          <PrivateRoute allowedRoles={["sender"]}>
             <CreateParcel />
           </PrivateRoute>
         }
@@ -62,7 +62,7 @@ function App() {
       <Route
         path="/profile"
         element={
-          <PrivateRoute allowedRoles={["user", "admin", "agent"]}>
+          <PrivateRoute allowedRoles={["sender", "admin", "agent"]}>
             <Profile />
           </PrivateRoute>
         }

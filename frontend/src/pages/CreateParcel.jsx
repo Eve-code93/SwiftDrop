@@ -1,29 +1,39 @@
-// src/pages/CreateParcel.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api/axios"; // Ensure this handles token automatically
+import { useAuth } from "../auth/AuthContext";
 
 function CreateParcel() {
+  const { user } = useAuth();
   const [description, setDescription] = useState("");
   const [destination, setDestination] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
 
     if (!description || !destination) {
       setError("Please fill in all fields");
       return;
     }
 
-    setError("");
+    try {
+      await api.post("/parcels", {
+        description,
+        destination,
+        user_id: user?.id, // If required
+      });
 
-    // TODO: Send POST request to backend to create parcel
-    // axios.post('/api/parcels', { description, destination, ... })
-
-    // For now, simulate success and redirect
-    console.log("Parcel created:", { description, destination });
-    navigate("/dashboard"); // Go back to dashboard after creation
+      setSuccess("Parcel created successfully!");
+      setTimeout(() => navigate("/dashboard"), 1000);
+    } catch (err) {
+      console.error("Failed to create parcel:", err);
+      setError("Failed to create parcel. Try again.");
+    }
   };
 
   return (
@@ -34,6 +44,7 @@ function CreateParcel() {
         </h1>
 
         {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+        {success && <p className="text-green-600 text-sm mb-4">{success}</p>}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -69,6 +80,13 @@ function CreateParcel() {
             Submit
           </button>
         </form>
+
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="mt-4 text-indigo-600 text-sm hover:underline block text-center"
+        >
+          ← Back to Dashboard
+        </button>
       </div>
     </div>
   );

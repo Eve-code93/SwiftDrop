@@ -1,114 +1,126 @@
+// src/pages/UserDashboard.jsx
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "../api/axios";
+import AccountTile from "../components/AccountTile";
 
 function UserDashboard() {
   const [parcels, setParcels] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [newParcel, setNewParcel] = useState({
-    description: "",
-    destination: "",
-  });
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // TODO: Fetch user parcels from backend using user ID or token
-    const dummyParcels = [
-      {
-        id: 1,
-        description: "Documents to Nairobi",
-        status: "In Transit",
-        created_at: "2025-06-23",
-      },
-      {
-        id: 2,
-        description: "Gift package to Eldoret",
-        status: "Delivered",
-        created_at: "2025-06-18",
-      },
-    ];
-    setParcels(dummyParcels);
+    const fetchParcels = async () => {
+      try {
+        const response = await axios.get("/parcels");
+        setParcels(response.data);
+      } catch (error) {
+        console.error("Error fetching parcels:", error);
+      }
+    };
+
+    fetchParcels();
   }, []);
 
-  const handleCreateParcel = (e) => {
-    e.preventDefault();
-    if (!newParcel.description || !newParcel.destination) return;
-
-    // TODO: Send POST request to backend to create parcel
-    // Example: axios.post('/api/parcels', newParcel)
-
-    const fakeNew = {
-      id: Date.now(),
-      ...newParcel,
-      status: "Pending",
-      created_at: new Date().toISOString().split("T")[0],
-    };
-    setParcels([fakeNew, ...parcels]);
-    setNewParcel({ description: "", destination: "" });
-    setShowForm(false);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Your Parcels</h1>
-
-      {/* Toggle New Parcel Form */}
-      <button
-        className="bg-indigo-600 text-white px-4 py-2 rounded mb-4"
-        onClick={() => setShowForm(!showForm)}
-      >
-        {showForm ? "Cancel" : "+ Create New Parcel"}
-      </button>
-
-      {/* New Parcel Form */}
-      {showForm && (
-        <form
-          onSubmit={handleCreateParcel}
-          className="bg-white border p-4 rounded mb-6 shadow-sm"
+    <div className="min-h-screen bg-gray-100">
+      {/* Navbar */}
+      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
+        <h1
+          className="text-xl font-bold text-indigo-600 cursor-pointer"
+          onClick={() => navigate("/dashboard")}
         >
-          <input
-            type="text"
-            placeholder="Parcel Description"
-            value={newParcel.description}
-            onChange={(e) =>
-              setNewParcel({ ...newParcel, description: e.target.value })
-            }
-            className="block w-full border rounded px-3 py-2 mb-3"
-          />
-          <input
-            type="text"
-            placeholder="Destination"
-            value={newParcel.destination}
-            onChange={(e) =>
-              setNewParcel({ ...newParcel, destination: e.target.value })
-            }
-            className="block w-full border rounded px-3 py-2 mb-3"
-          />
+          SwiftDrop
+        </h1>
+        <div className="flex gap-4 items-center text-sm">
           <button
-            type="submit"
-            className="bg-green-600 text-white px-4 py-2 rounded"
+            onClick={() => navigate("/parcels/new")}
+            className="text-indigo-600 hover:underline"
           >
-            Submit
+            Send a Parcel
           </button>
-        </form>
-      )}
-
-      {/* List of Parcels */}
-      <div className="space-y-4">
-        {parcels.map((parcel) => (
-          <div
-            key={parcel.id}
-            className="border p-4 rounded shadow-sm bg-white"
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="text-indigo-600 hover:underline"
           >
-            <h2 className="text-lg font-semibold">{parcel.description}</h2>
-            <p>Destination: {parcel.destination || "N/A"}</p>
-            <p>Status: {parcel.status}</p>
-            <p className="text-sm text-gray-500">
-              Created: {parcel.created_at}
-            </p>
-            <button className="mt-2 text-blue-600 underline">
-              Track Parcel
-            </button>
-          </div>
-        ))}
-      </div>
+            Track My Parcel
+          </button>
+          <button
+            onClick={() => navigate("/profile")}
+            className="text-gray-700 hover:underline"
+          >
+            My Account
+          </button>
+          <button
+            onClick={handleLogout}
+            className="text-red-600 font-medium hover:underline"
+          >
+            Logout
+          </button>
+        </div>
+      </nav>
+
+      {/* Dashboard Tiles */}
+      <main className="p-6 space-y-8">
+        <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <AccountTile
+            title="Total Orders"
+            value={parcels.length}
+            icon="src/assets/myorders.png"            
+          />
+          <AccountTile
+            title="Delivered"
+            value={parcels.filter((p) => p.status === "delivered").length}
+            icon="/assets/delivered-icon.svg"
+            color="text-green-600"
+          />
+          <AccountTile
+            title="In Transit"
+            value={parcels.filter((p) => p.status === "in_transit").length}
+            icon="/assets/transit-icon.svg"
+            color="text-blue-600"
+          />
+        </section>
+
+        {/* Parcel List */}
+        <section className="bg-white shadow rounded p-6">
+          <h2 className="text-lg font-semibold mb-4">My Parcels</h2>
+          {parcels.length === 0 ? (
+            <p className="text-gray-500 text-sm">No parcels found.</p>
+          ) : (
+            <table className="w-full table-auto text-sm">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-2 text-left">#</th>
+                  <th className="p-2 text-left">Description</th>
+                  <th className="p-2 text-left">Destination</th>
+                  <th className="p-2 text-left">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {parcels.map((parcel) => (
+                  <tr
+                    key={parcel.id}
+                    className="border-b hover:bg-gray-50 cursor-pointer"
+                    onClick={() => navigate(`/parcels/${parcel.id}`)}
+                  >
+                    <td className="p-2">#{parcel.id}</td>
+                    <td className="p-2">{parcel.description}</td>
+                    <td className="p-2">{parcel.destination}</td>
+                    <td className="p-2 capitalize text-indigo-600">
+                      {parcel.status}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+      </main>
     </div>
   );
 }
