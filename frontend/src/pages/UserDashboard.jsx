@@ -44,7 +44,7 @@ function UserDashboard() {
             Send a Parcel
           </button>
           <button
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/parcels/:id")}
             className="text-indigo-600 hover:underline"
           >
             Track My Parcel
@@ -122,6 +122,7 @@ function UserDashboard() {
         </section>
       </main>
     </div>
+    
   );
 }
 

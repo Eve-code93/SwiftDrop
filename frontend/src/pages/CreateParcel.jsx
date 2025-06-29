@@ -24,8 +24,7 @@ function CreateParcel() {
     try {
       await api.post("/parcels", {
         description,
-        destination,
-        sender_id: user.id,
+        destination,        
       });
 
       setSuccess("Parcel created successfully!");
