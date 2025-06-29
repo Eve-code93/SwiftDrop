@@ -1,3 +1,5 @@
+import api from "../api/axios";
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -10,7 +12,7 @@ function ResetPassword() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!password || !confirmPassword) {
@@ -23,18 +25,24 @@ function ResetPassword() {
       return;
     }
 
-    setError("");
+    try {
+      const response = await api.post(`/auth/reset-password/${token}`, {
+        password,
+      });
 
-    // TODO: Send password reset request to backend
-    // Example:
-    // axios.post(`/api/reset-password/${token}`, { password })
+      setSuccess("Password reset successful! Redirecting to login...");
+      setError("");
 
-    setSuccess("Password reset successful! Redirecting to login...");
-
-    setTimeout(() => {
-      navigate("/login");
-    }, 2000);
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } catch (err) {
+      console.error("Reset failed:", err);
+      setError(err.response?.data?.message || "Password reset failed.");
+      setSuccess("");
+    }
   };
+  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4 py-8">

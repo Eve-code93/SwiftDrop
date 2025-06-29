@@ -31,6 +31,7 @@ function Login() {
 
       const decodedUser = jwtDecode(access_token);
       console.log("Decoded JWT:", decodedUser); // 👈 check this too
+      console.log("User role from token:", decodedUser.role); // 👈 Add this
 
       login({ token: access_token });
 
