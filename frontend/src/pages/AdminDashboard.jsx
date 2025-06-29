@@ -1,36 +1,38 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../api/axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [parcels, setParcels] = useState([]);
   const [roleChanges, setRoleChanges] = useState({});
   const [agentAssignments, setAgentAssignments] = useState({});
+  const [assigning, setAssigning] = useState({});
   const [metrics, setMetrics] = useState({
     total_parcels: 0,
     delivered: 0,
     in_transit: 0,
     pending: 0,
   });
+
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch users
         const usersResponse = await axios.get("/admin/users");
         setUsers(usersResponse.data);
 
-        // Fetch parcels
         const parcelsResponse = await axios.get("/parcels");
         setParcels(parcelsResponse.data);
 
-        // Fetch metrics
         const metricsResponse = await axios.get("/admin/metrics");
         setMetrics(metricsResponse.data);
       } catch (error) {
         console.error("Error fetching data:", error);
+        toast.error("Failed to load dashboard data.");
       }
     };
 
@@ -58,37 +60,48 @@ function AdminDashboard() {
         )
       );
       setRoleChanges((prev) => ({ ...prev, [userId]: "" }));
+      toast.success("Role updated successfully.");
     } catch (error) {
       console.error("Error changing user role:", error);
-      alert("Failed to change user role. Please try again.");
+      toast.error("Failed to change user role.");
     }
   };
 
   const assignAgent = async (parcelId) => {
     const agentId = agentAssignments[parcelId];
-    if (!agentId) return;
+    if (!agentId) {
+      toast.warning("Please select an agent before assigning.");
+      return;
+    }
+
+    setAssigning((prev) => ({ ...prev, [parcelId]: true }));
+
+    const previousParcels = [...parcels];
+    setParcels((prev) =>
+      prev.map((parcel) =>
+        parcel.id === parcelId ? { ...parcel, assigned_agent: agentId } : parcel
+      )
+    );
 
     try {
       await axios.post("/admin/assign", {
         parcel_id: parcelId,
         agent_id: agentId,
       });
-      setParcels((prev) =>
-        prev.map((parcel) =>
-          parcel.id === parcelId
-            ? { ...parcel, assigned_agent: agentId }
-            : parcel
-        )
-      );
       setAgentAssignments((prev) => ({ ...prev, [parcelId]: "" }));
+      toast.success("Agent assigned successfully.");
     } catch (error) {
-      console.error("Error assigning agent:", error);
-      alert("Failed to assign agent. Please try again.");
+      console.error("Assignment error:", error);
+      setParcels(previousParcels);
+      toast.error("Failed to assign agent. Try again.");
+    } finally {
+      setAssigning((prev) => ({ ...prev, [parcelId]: false }));
     }
   };
 
   return (
     <div className="p-6 space-y-10 bg-gray-50 min-h-screen">
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <button
@@ -99,32 +112,24 @@ function AdminDashboard() {
         </button>
       </div>
 
-      {/* Parcel Stats */}
+      {/* Parcel Metrics */}
       <section className="bg-white p-6 rounded shadow grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="text-center">
-          <h3 className="text-sm font-medium text-gray-500">Total Parcels</h3>
-          <p className="text-2xl font-semibold text-gray-800">
-            {metrics.total_parcels}
-          </p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-medium text-gray-500">Delivered</h3>
-          <p className="text-2xl font-semibold text-green-600">
-            {metrics.delivered}
-          </p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-medium text-gray-500">In Transit</h3>
-          <p className="text-2xl font-semibold text-blue-600">
-            {metrics.in_transit}
-          </p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-medium text-gray-500">Pending</h3>
-          <p className="text-2xl font-semibold text-yellow-600">
-            {metrics.pending}
-          </p>
-        </div>
+        {Object.entries(metrics).map(([key, value]) => {
+          const color = {
+            total_parcels: "text-gray-800",
+            delivered: "text-green-600",
+            in_transit: "text-blue-600",
+            pending: "text-yellow-600",
+          }[key];
+          return (
+            <div key={key} className="text-center">
+              <h3 className="text-sm font-medium text-gray-500 capitalize">
+                {key.replace("_", " ")}
+              </h3>
+              <p className={`text-2xl font-semibold ${color}`}>{value}</p>
+            </div>
+          );
+        })}
       </section>
 
       {/* User Management */}
@@ -179,7 +184,7 @@ function AdminDashboard() {
               <p className="mb-2 font-medium">
                 Parcel #{parcel.id} — {parcel.description || "No description"}
               </p>
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <select
                   value={agentAssignments[parcel.id] || ""}
                   onChange={(e) =>
@@ -201,10 +206,21 @@ function AdminDashboard() {
                 </select>
                 <button
                   onClick={() => assignAgent(parcel.id)}
-                  className="bg-green-600 text-white px-3 py-1 rounded"
+                  disabled={assigning[parcel.id]}
+                  className={`px-3 py-1 rounded ${
+                    assigning[parcel.id]
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-green-600 text-white"
+                  }`}
                 >
-                  Assign
+                  {assigning[parcel.id] ? "Assigning..." : "Assign"}
                 </button>
+                {parcel.assigned_agent && (
+                  <span className="text-sm text-green-700 font-medium ml-2">
+                    Assigned to:{" "}
+                    {users.find((u) => u.id === parcel.assigned_agent)?.email}
+                  </span>
+                )}
               </div>
             </div>
           ))}
