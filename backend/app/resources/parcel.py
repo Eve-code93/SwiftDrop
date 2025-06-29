@@ -47,7 +47,6 @@ class ParcelListResource(Resource):
             data = request.get_json()
             user_id = int(get_jwt_identity())
 
-            # Validate required fields
             if not data.get('description'):
                 return {"message": "Description is required"}, 400
             if not data.get('destination'):
@@ -79,7 +78,7 @@ class ParcelListResource(Resource):
 class ParcelResource(Resource):
     @jwt_required()
     def get(self, parcel_id):
-        """Get specific parcel (owner, assigned agent or admin only)"""
+        """Get specific parcel (admin, sender or assigned agent)"""
         try:
             user_id = int(get_jwt_identity())
             user = User.query.get_or_404(user_id)
@@ -122,15 +121,16 @@ class ParcelResource(Resource):
             parcel = Parcel.query.get_or_404(parcel_id)
             data = request.get_json()
 
-            if 'receiver_id' in data and data['receiver_id']:
-                if not User.query.get(data['receiver_id']):
+            if 'receiver_id' in data:
+                if data['receiver_id'] and not User.query.get(data['receiver_id']):
                     return {"message": "Receiver not found"}, 404
+                parcel.receiver_id = data['receiver_id']
 
-            if 'agent_id' in data and data['agent_id']:
+            if 'agent_id' in data:
                 agent = User.query.get(data['agent_id'])
                 if not agent or agent.role != 'agent':
                     return {"message": "Agent not found or not an agent"}, 404
-                parcel.agent_id = data['agent_id']
+                parcel.agent_id = agent.id
                 if parcel.status == 'pending':
                     parcel.status = 'assigned'
 
@@ -138,8 +138,6 @@ class ParcelResource(Resource):
                 parcel.description = data['description']
             if 'status' in data:
                 parcel.status = data['status']
-            if 'receiver_id' in data:
-                parcel.receiver_id = data['receiver_id']
             if 'destination' in data:
                 parcel.destination = data['destination']
 
