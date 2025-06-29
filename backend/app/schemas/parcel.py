@@ -5,6 +5,7 @@ from .parcel_tag import ParcelTagSchema
 class ParcelSchema(Schema):
     id = fields.Int(dump_only=True)
     description = fields.Str(required=True)
+    destination = fields.Str(required=True)
     status = fields.Str()
     created_at = fields.DateTime(dump_only=True)
     sender_id = fields.Int(required=True)

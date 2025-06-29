@@ -7,6 +7,7 @@ class Parcel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(255))
+    destination = db.Column(db.String(100), nullable=False)
     status = db.Column(db.String(50), default='Pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
