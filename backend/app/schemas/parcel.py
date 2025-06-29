@@ -12,6 +12,6 @@ class ParcelSchema(Schema):
     sender_id = fields.Int(required=True)
     receiver_id = fields.Int()
 
-    sender = fields.Nested(UserSchema(only=("id", "email", "name")), dump_only=True)  # ✅ Add this
-    agent = fields.Nested(UserSchema(only=("id", "email", "name")), dump_only=True)   # ✅ Add this
+    sender = fields.Nested(UserSchema(only=("id", "email", )), dump_only=True)  # ✅ Add this
+    agent = fields.Nested(UserSchema(only=("id", "email", )), dump_only=True)   # ✅ Add this
     tags = fields.Nested(ParcelTagSchema, many=True, dump_only=True)
