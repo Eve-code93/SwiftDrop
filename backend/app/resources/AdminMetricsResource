@@ -1,0 +1,22 @@
+# app/resources/admin_metrics.py
+
+from flask_restful import Resource
+from flask_jwt_extended import jwt_required
+from app.utils.decorators import role_required
+from app.models.parcel import Parcel
+
+class AdminMetricsResource(Resource):
+    @jwt_required()
+    @role_required("admin")
+    def get(self):
+        total_parcels = Parcel.query.count()
+        delivered = Parcel.query.filter_by(status="delivered").count()
+        in_transit = Parcel.query.filter_by(status="in_transit").count()
+        pending = Parcel.query.filter_by(status="pending").count()
+
+        return {
+            "total_parcels": total_parcels,
+            "delivered": delivered,
+            "in_transit": in_transit,
+            "pending": pending
+        }, 200
