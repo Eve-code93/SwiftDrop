@@ -24,11 +24,11 @@ function CreateParcel() {
     try {
       await api.post("/parcels", {
         description,
-        destination,        
+        destination,
       });
 
       setSuccess("Parcel created successfully!");
-      setTimeout(() => navigate("/dashboard"), 1000);
+      setTimeout(() => navigate("/dashboard"), 1200);
     } catch (err) {
       console.error("Failed to create parcel:", err);
       setError("Failed to create parcel. Try again.");
@@ -36,17 +36,25 @@ function CreateParcel() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-bold text-indigo-600 mb-4">
-          Create Parcel
+    <div className="min-h-screen flex items-center justify-center bg-[#f5f4f8] p-6">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+        <h1 className="text-2xl font-bold text-[#5c5470] mb-4 text-center">
+          Create a New Parcel
         </h1>
 
-        {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
-        {success && <p className="text-green-600 text-sm mb-4">{success}</p>}
+        {error && (
+          <p className="text-red-500 bg-red-100 border border-red-300 p-2 rounded text-sm mb-4 text-center">
+            {error}
+          </p>
+        )}
+        {success && (
+          <p className="text-green-600 bg-green-50 border border-green-200 p-2 rounded text-sm mb-4 text-center">
+            {success}
+          </p>
+        )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
             <label className="block mb-1 text-sm text-gray-700">
               Description
             </label>
@@ -54,12 +62,12 @@ function CreateParcel() {
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g. Documents to Nairobi"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:ring-indigo-400"
+              placeholder="e.g. Laptop to Nakuru"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#726d91]"
             />
           </div>
 
-          <div className="mb-4">
+          <div>
             <label className="block mb-1 text-sm text-gray-700">
               Destination
             </label>
@@ -67,22 +75,22 @@ function CreateParcel() {
               type="text"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
-              placeholder="e.g. Nairobi"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:ring-indigo-400"
+              placeholder="e.g. Nakuru"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#726d91]"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
+            className="w-full bg-[#726d91] hover:bg-[#5c5470] text-white font-medium py-2 rounded-lg transition"
           >
-            Submit
+            Submit Parcel
           </button>
         </form>
 
         <button
           onClick={() => navigate("/dashboard")}
-          className="mt-4 text-indigo-600 text-sm hover:underline block text-center"
+          className="mt-5 text-[#726d91] hover:underline text-sm block text-center"
         >
           ← Back to Dashboard
         </button>

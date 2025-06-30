@@ -24,15 +24,12 @@ function Login() {
 
     try {
       const response = await api.post("/auth/login", { email, password });
-
-      
       const { access_token } = response.data;
-
       const decodedUser = jwtDecode(access_token);
-     
+
       login({ token: access_token });
 
-      // Redirect based on role from decoded token
+      // Role-based navigation
       if (decodedUser.role === "admin") navigate("/admin");
       else if (decodedUser.role === "agent") navigate("/agent");
       else if (decodedUser.role === "sender") navigate("/dashboard");
@@ -44,96 +41,88 @@ function Login() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4 py-8">
-      <div className="inline-flex mb-4">
-        <Link to="/" className="inline-flex flex-row items-center">
-          <span className="leading-10 text-gray-800 text-4xl font-bold ml-1 uppercase">
-            SwiftDrop
-          </span>
-        </Link>
-      </div>
+    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-purple-100 via-pink-100 to-white px-4 py-8">
+      {/* Logo */}
+      <Link to="/" className="mb-6 text-4xl font-bold text-purple-700 hover:text-purple-800 transition">
+        Swift<span className="text-pink-500">Drop</span>
+      </Link>
 
-      <div className="text-sm sm:text-base text-gray-600 my-4">
-        Login to your account
-      </div>
+      {/* Form Card */}
+      <div className="bg-white w-full max-w-md rounded-xl shadow-lg border border-gray-200 p-8">
+        <h2 className="text-2xl font-semibold text-center text-gray-700 mb-6">
+          Login to Your Account
+        </h2>
 
-      <div className="rounded-md bg-white w-full max-w-sm sm:max-w-md border border-gray-200 shadow-md px-4 py-6 sm:p-8">
         {error && (
-          <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
+          <div className="bg-red-100 text-red-700 px-4 py-2 mb-4 rounded text-sm text-center">
+            {error}
+          </div>
         )}
 
         <form onSubmit={handleSubmit}>
-          <div className="flex flex-col mb-4">
-            <label
-              htmlFor="email"
-              className="mb-1 text-xs sm:text-sm text-gray-600"
-            >
-              Email:
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-600 mb-1">
+              Email Address
             </label>
             <input
-              id="email"
               type="email"
+              id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="text-sm placeholder-gray-500 pl-3 pr-4 rounded-lg border border-gray-400 w-full py-2 focus:outline-none focus:border-indigo-400"
-              placeholder="Enter email"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none transition"
+              placeholder="Enter your email"
               required
             />
           </div>
 
-          <div className="flex flex-col mb-4">
-            <label
-              htmlFor="password"
-              className="mb-1 text-xs sm:text-sm text-gray-600"
-            >
-              Password:
+          <div className="mb-6">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-600 mb-1">
+              Password
             </label>
             <input
-              id="password"
               type="password"
+              id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="text-sm placeholder-gray-500 pl-3 pr-4 rounded-lg border border-gray-400 w-full py-2 focus:outline-none focus:border-indigo-400"
-              placeholder="Enter password"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400 outline-none transition"
+              placeholder="Enter your password"
               required
             />
           </div>
 
-          <div className="flex w-full mt-6">
-            <button
-              type="submit"
-              className="flex items-center justify-center text-white bg-indigo-600 hover:bg-indigo-700 rounded py-2 w-full transition duration-150 ease-in"
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white py-2 rounded-lg font-semibold hover:opacity-90 transition flex items-center justify-center"
+          >
+            <svg
+              className="h-5 w-5 mr-2 animate-pulse"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              viewBox="0 0 24 24"
             >
-              <span className="mr-2 uppercase">Login</span>
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                viewBox="0 0 24 24"
-              >
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+            Login
+          </button>
         </form>
-      </div>
 
-      <div className="flex justify-center items-center mt-6">
-        <Link
-          to="/register"
-          className="text-indigo-500 hover:text-indigo-700 text-sm font-bold"
-        >
-          Don’t have an account? Register
-        </Link>
-        <Link
-          to="/forgot-password/:token"
-          className="ml-4 text-indigo-500 hover:text-indigo-700 text-sm font-bold"
-        >
-          Forgot Password?
-        </Link>
+        {/* Links */}
+        <div className="mt-6 text-sm text-center space-y-2">
+          <p>
+            Don’t have an account?{" "}
+            <Link to="/register" className="text-purple-600 font-medium hover:underline">
+              Register
+            </Link>
+          </p>
+          <p>
+            <Link to="/forgot-password/:token" className="text-pink-600 font-medium hover:underline">
+              Forgot Password?
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
 // src/pages/AgentDashboard.jsx
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
-import { useNavigate } from "react-router-dom";
 
 function AgentDashboard() {
   const { user, logout } = useAuth();
@@ -42,63 +42,84 @@ function AgentDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-indigo-600">
-          Welcome Agent {user?.name || ""}
+    <div className="min-h-screen bg-gradient-to-tr from-gray-50 via-white to-gray-100 p-6">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold text-indigo-700">
+          Agent Dashboard
         </h1>
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-        >
-          Logout
-        </button>
+        <div className="flex gap-4 items-center">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="text-sm text-indigo-600 font-medium hover:underline"
+          >
+            🏠 Home
+          </button>
+          <button
+            onClick={handleLogout}
+            className="text-sm text-red-500 hover:underline font-medium"
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
+      {/* Agent Info */}
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5 mb-6">
+        <p className="text-gray-700">
+          <strong>Name:</strong> {user?.name}
+        </p>
+        <p className="text-gray-700">
+          <strong>Email:</strong> {user?.email}
+        </p>
+        <p className="text-gray-700">
+          <strong>Role:</strong> {user?.role}
+        </p>
+      </div>
+
+      {/* Error Message */}
       {error && (
-        <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4">
+        <div className="bg-red-100 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
           {error}
         </div>
       )}
 
+      {/* Assigned Parcels */}
       {parcels.length === 0 ? (
-        <p className="text-gray-600">No assigned parcels.</p>
+        <p className="text-gray-600 text-center">No assigned parcels yet.</p>
       ) : (
-        <div className="space-y-4">
+        <div className="grid gap-4">
           {parcels.map((parcel) => (
             <div
               key={parcel.id}
-              className="bg-white p-4 rounded shadow border border-gray-200"
+              className="bg-white border border-purple-100 rounded-lg shadow-sm p-5"
             >
-              <h2 className="font-semibold text-lg text-gray-800">
+              <h2 className="text-lg font-semibold text-[#5c5470] mb-2">
                 Parcel #{parcel.id}
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-700 mb-1">
                 <strong>Description:</strong> {parcel.description}
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-700 mb-1">
                 <strong>Destination:</strong> {parcel.destination}
               </p>
-              <p className="text-sm text-gray-600">
-                <strong>Status:</strong>{" "}
-                <span className="font-medium text-indigo-700">
-                  {parcel.status}
-                </span>
+              <p className="text-sm font-medium text-indigo-600">
+                <strong>Status:</strong> {parcel.status}
               </p>
 
-              <div className="mt-3 flex gap-2 flex-wrap">
+              <div className="mt-4 flex flex-wrap gap-2">
                 {["Picked", "In Transit", "Delivered"].map((status) => (
                   <button
                     key={status}
                     onClick={() => handleStatusUpdate(parcel.id, status)}
                     disabled={parcel.status === status}
-                    className={`px-3 py-1 rounded text-sm transition ${
+                    className={`px-4 py-1.5 text-sm rounded transition font-medium ${
                       parcel.status === status
-                        ? "bg-gray-300 cursor-not-allowed"
-                        : "bg-indigo-500 text-white hover:bg-indigo-600"
+                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                        : "bg-indigo-600 text-white hover:bg-indigo-700"
                     }`}
                   >
-                    {status}
+                    Mark as {status}
                   </button>
                 ))}
               </div>

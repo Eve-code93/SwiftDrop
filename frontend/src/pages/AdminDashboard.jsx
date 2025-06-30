@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "../api/axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -27,7 +27,7 @@ function AdminDashboard() {
           axios.get("/parcels"),
           axios.get("/admin/metrics")
         ]);
-        
+
         setUsers(usersResponse.data);
         setParcels(parcelsResponse.data);
         setMetrics(metricsResponse.data);
@@ -101,81 +101,69 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f7f7f8]">
       <ToastContainer position="top-right" autoClose={3000} />
-      
-      {/* Modern Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Admin Portal</h1>
-            <p className="text-sm text-gray-500">Manage users and parcels</p>
+
+      <header className="bg-white shadow sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 className="text-xl font-semibold text-[#5c5470]">SwiftDrop Admin Panel</h1>
+          <div className="flex gap-4">
+            <Link
+              to="/"
+              className="px-4 py-2 bg-[#726d91] text-white text-sm rounded hover:bg-[#5c5470]"
+            >
+              Home
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-[#b45f06] text-white text-sm rounded hover:bg-[#944f05]"
+            >
+              Logout
+            </button>
           </div>
-          <button
-            onClick={handleLogout}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-          >
-            Sign out
-          </button>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-8">
-        {/* Metrics Cards */}
-        <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <main className="max-w-7xl mx-auto px-4 py-6 space-y-8">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {Object.entries(metrics).map(([key, value]) => {
-            const config = {
-              total_parcels: { color: "bg-gray-100", text: "Total Parcels" },
-              delivered: { color: "bg-green-50", text: "Delivered" },
-              in_transit: { color: "bg-blue-50", text: "In Transit" },
-              pending: { color: "bg-yellow-50", text: "Pending" },
-            }[key];
-            
+            const labels = {
+              total_parcels: "Total Parcels",
+              delivered: "Delivered",
+              in_transit: "In Transit",
+              pending: "Pending",
+            };
             return (
-              <div key={key} className={`${config.color} overflow-hidden rounded-lg shadow px-4 py-5 sm:p-6`}>
-                <dt className="text-sm font-medium text-gray-500 truncate">{config.text}</dt>
-                <dd className="mt-1 text-3xl font-semibold text-gray-900">{value}</dd>
+              <div key={key} className="bg-white p-4 rounded shadow text-center">
+                <p className="text-sm text-gray-500">{labels[key]}</p>
+                <p className="text-2xl font-bold text-[#5c5470]">{value}</p>
               </div>
             );
           })}
         </section>
 
-        {/* User Management */}
-        <section className="bg-white shadow overflow-hidden sm:rounded-lg">
-          <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-            <h2 className="text-lg leading-6 font-medium text-gray-900">User Management</h2>
-            <p className="mt-1 text-sm text-gray-500">Update user roles and permissions</p>
-          </div>
+        <section className="bg-white rounded shadow p-6">
+          <h2 className="text-lg font-semibold text-[#5c5470] mb-4">Manage Users</h2>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Current Role
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#f0eef3]">
+                  <th className="p-3 text-sm font-medium text-[#5c5470]">Email</th>
+                  <th className="p-3 text-sm font-medium text-[#5c5470]">Role</th>
+                  <th className="p-3 text-sm font-medium text-[#5c5470]">Action</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody>
                 {users.map((user) => (
-                  <tr key={user.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {user.email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
-                      {user.role}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex items-center space-x-2">
+                  <tr key={user.id} className="border-b">
+                    <td className="p-3 text-sm text-gray-700">{user.email}</td>
+                    <td className="p-3 text-sm text-gray-600 capitalize">{user.role}</td>
+                    <td className="p-3">
+                      <div className="flex gap-2">
                         <select
                           value={roleChanges[user.id] || ""}
                           onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                          className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                          className="border rounded px-2 py-1 text-sm"
                         >
                           <option value="">Select Role</option>
                           <option value="user">User</option>
@@ -184,7 +172,7 @@ function AdminDashboard() {
                         </select>
                         <button
                           onClick={() => applyRoleChange(user.id)}
-                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                          className="bg-[#726d91] hover:bg-[#5c5470] text-white px-3 py-1 rounded text-sm"
                         >
                           Update
                         </button>
@@ -197,57 +185,40 @@ function AdminDashboard() {
           </div>
         </section>
 
-        {/* Parcel Assignment */}
-        <section className="bg-white shadow overflow-hidden sm:rounded-lg">
-          <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-            <h2 className="text-lg leading-6 font-medium text-gray-900">Parcel Assignments</h2>
-            <p className="mt-1 text-sm text-gray-500">Assign delivery agents to parcels</p>
-          </div>
-          <div className="px-4 py-5 sm:p-6 space-y-4">
+        <section className="bg-white rounded shadow p-6">
+          <h2 className="text-lg font-semibold text-[#5c5470] mb-4">Assign Agents to Parcels</h2>
+          <div className="space-y-4">
             {parcels.map((parcel) => (
-              <div key={parcel.id} className="border border-gray-200 rounded-lg p-4">
+              <div key={parcel.id} className="border rounded p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <div className="mb-3 sm:mb-0">
-                    <h3 className="text-base font-medium text-gray-900">Parcel #{parcel.id}</h3>
-                    <p className="text-sm text-gray-500">{parcel.description || "No description provided"}</p>
+                  <div>
+                    <p className="text-sm font-medium text-[#5c5470]">Parcel #{parcel.id}</p>
+                    <p className="text-sm text-gray-500">{parcel.description || "No description"}</p>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex gap-2 mt-2 sm:mt-0">
                     <select
                       value={agentAssignments[parcel.id] || ""}
                       onChange={(e) =>
-                        setAgentAssignments((prev) => ({
-                          ...prev,
-                          [parcel.id]: Number(e.target.value),
-                        }))
+                        setAgentAssignments((prev) => ({ ...prev, [parcel.id]: Number(e.target.value) }))
                       }
-                      className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                      className="border rounded px-2 py-1 text-sm"
                     >
                       <option value="">Select Agent</option>
-                      {users
-                        .filter((u) => u.role === "agent")
-                        .map((agent) => (
-                          <option key={agent.id} value={agent.id}>
-                            {agent.email}
-                          </option>
-                        ))}
+                      {users.filter((u) => u.role === "agent").map((agent) => (
+                        <option key={agent.id} value={agent.id}>{agent.email}</option>
+                      ))}
                     </select>
                     <button
                       onClick={() => assignAgent(parcel.id)}
                       disabled={assigning[parcel.id]}
-                      className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white ${
-                        assigning[parcel.id]
-                          ? "bg-gray-400 cursor-not-allowed"
-                          : "bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                      }`}
+                      className={`text-white px-3 py-1 rounded text-sm ${assigning[parcel.id] ? "bg-gray-400" : "bg-[#6c91bf] hover:bg-[#5273a3]"}`}
                     >
                       {assigning[parcel.id] ? "Assigning..." : "Assign"}
                     </button>
                   </div>
                 </div>
                 {parcel.assigned_agent && (
-                  <div className="mt-3 text-sm text-green-600 font-medium">
-                    Currently assigned to: {users.find((u) => u.id === parcel.assigned_agent)?.email}
-                  </div>
+                  <p className="mt-2 text-sm text-green-600">Assigned to: {users.find((u) => u.id === parcel.assigned_agent)?.email}</p>
                 )}
               </div>
             ))}
@@ -255,13 +226,8 @@ function AdminDashboard() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-8">
-        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-sm text-gray-500">
-            &copy; {new Date().getFullYear()} Delivery App Admin. All rights reserved.
-          </p>
-        </div>
+      <footer className="bg-[#f0eef3] border-t mt-8 py-4 text-center text-sm text-gray-600">
+        &copy; {new Date().getFullYear()} SwiftDrop Admin. All rights reserved.
       </footer>
     </div>
   );

@@ -12,6 +12,7 @@ import ParcelDetails from "./pages/ParcelDetails";
 import CreateParcel from "./pages/CreateParcel";
 import Profile from "./pages/Profile";
 
+
 function App() {
   return (
     <Routes>

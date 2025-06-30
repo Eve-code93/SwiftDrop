@@ -7,7 +7,6 @@ const api = axios.create({
   },
 });
 
-// Add a request interceptor to include the token in headers if available
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -16,9 +15,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 export default api;
