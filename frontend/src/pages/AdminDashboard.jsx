@@ -22,13 +22,14 @@ function AdminDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersResponse = await axios.get("/admin/users");
+        const [usersResponse, parcelsResponse, metricsResponse] = await Promise.all([
+          axios.get("/admin/users"),
+          axios.get("/parcels"),
+          axios.get("/admin/metrics")
+        ]);
+        
         setUsers(usersResponse.data);
-
-        const parcelsResponse = await axios.get("/parcels");
         setParcels(parcelsResponse.data);
-
-        const metricsResponse = await axios.get("/admin/metrics");
         setMetrics(metricsResponse.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -100,132 +101,168 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="p-6 space-y-10 bg-gray-50 min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 text-white px-4 py-2 rounded"
-        >
-          Logout
-        </button>
-      </div>
+      
+      {/* Modern Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Admin Portal</h1>
+            <p className="text-sm text-gray-500">Manage users and parcels</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            Sign out
+          </button>
+        </div>
+      </header>
 
-      {/* Parcel Metrics */}
-      <section className="bg-white p-6 rounded shadow grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {Object.entries(metrics).map(([key, value]) => {
-          const color = {
-            total_parcels: "text-gray-800",
-            delivered: "text-green-600",
-            in_transit: "text-blue-600",
-            pending: "text-yellow-600",
-          }[key];
-          return (
-            <div key={key} className="text-center">
-              <h3 className="text-sm font-medium text-gray-500 capitalize">
-                {key.replace("_", " ")}
-              </h3>
-              <p className={`text-2xl font-semibold ${color}`}>{value}</p>
-            </div>
-          );
-        })}
-      </section>
+      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-8">
+        {/* Metrics Cards */}
+        <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {Object.entries(metrics).map(([key, value]) => {
+            const config = {
+              total_parcels: { color: "bg-gray-100", text: "Total Parcels" },
+              delivered: { color: "bg-green-50", text: "Delivered" },
+              in_transit: { color: "bg-blue-50", text: "In Transit" },
+              pending: { color: "bg-yellow-50", text: "Pending" },
+            }[key];
+            
+            return (
+              <div key={key} className={`${config.color} overflow-hidden rounded-lg shadow px-4 py-5 sm:p-6`}>
+                <dt className="text-sm font-medium text-gray-500 truncate">{config.text}</dt>
+                <dd className="mt-1 text-3xl font-semibold text-gray-900">{value}</dd>
+              </div>
+            );
+          })}
+        </section>
 
-      {/* User Management */}
-      <section className="bg-white p-6 rounded shadow">
-        <h2 className="text-xl font-semibold mb-4">Manage Users</h2>
-        <table className="w-full table-auto border">
-          <thead className="bg-gray-200">
-            <tr>
-              <th className="p-2">Email</th>
-              <th className="p-2">Role</th>
-              <th className="p-2">Change Role</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id} className="border-b text-center">
-                <td className="p-2">{user.email}</td>
-                <td className="p-2">{user.role}</td>
-                <td className="p-2">
-                  <select
-                    value={roleChanges[user.id] || ""}
-                    onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                    className="border px-2 py-1 rounded"
-                  >
-                    <option value="">Select Role</option>
-                    <option value="user">User</option>
-                    <option value="agent">Agent</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                  <button
-                    onClick={() => applyRoleChange(user.id)}
-                    className="ml-2 bg-indigo-600 text-white px-3 py-1 rounded"
-                  >
-                    Change
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+        {/* User Management */}
+        <section className="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h2 className="text-lg leading-6 font-medium text-gray-900">User Management</h2>
+            <p className="mt-1 text-sm text-gray-500">Update user roles and permissions</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Current Role
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {users.map((user) => (
+                  <tr key={user.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {user.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
+                      {user.role}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex items-center space-x-2">
+                        <select
+                          value={roleChanges[user.id] || ""}
+                          onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                          className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                        >
+                          <option value="">Select Role</option>
+                          <option value="user">User</option>
+                          <option value="agent">Agent</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                        <button
+                          onClick={() => applyRoleChange(user.id)}
+                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          Update
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-      {/* Assign Agents */}
-      <section className="bg-white p-6 rounded shadow">
-        <h2 className="text-xl font-semibold mb-4">Assign Agents to Parcels</h2>
-        <div className="space-y-4">
-          {parcels.map((parcel) => (
-            <div
-              key={parcel.id}
-              className="bg-gray-100 p-4 border rounded shadow-sm"
-            >
-              <p className="mb-2 font-medium">
-                Parcel #{parcel.id} — {parcel.description || "No description"}
-              </p>
-              <div className="flex flex-wrap items-center gap-2">
-                <select
-                  value={agentAssignments[parcel.id] || ""}
-                  onChange={(e) =>
-                    setAgentAssignments((prev) => ({
-                      ...prev,
-                      [parcel.id]: Number(e.target.value),
-                    }))
-                  }
-                  className="border px-2 py-1 rounded"
-                >
-                  <option value="">Select Agent</option>
-                  {users
-                    .filter((u) => u.role === "agent")
-                    .map((agent) => (
-                      <option key={agent.id} value={agent.id}>
-                        {agent.email}
-                      </option>
-                    ))}
-                </select>
-                <button
-                  onClick={() => assignAgent(parcel.id)}
-                  disabled={assigning[parcel.id]}
-                  className={`px-3 py-1 rounded ${
-                    assigning[parcel.id]
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-green-600 text-white"
-                  }`}
-                >
-                  {assigning[parcel.id] ? "Assigning..." : "Assign"}
-                </button>
+        {/* Parcel Assignment */}
+        <section className="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h2 className="text-lg leading-6 font-medium text-gray-900">Parcel Assignments</h2>
+            <p className="mt-1 text-sm text-gray-500">Assign delivery agents to parcels</p>
+          </div>
+          <div className="px-4 py-5 sm:p-6 space-y-4">
+            {parcels.map((parcel) => (
+              <div key={parcel.id} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                  <div className="mb-3 sm:mb-0">
+                    <h3 className="text-base font-medium text-gray-900">Parcel #{parcel.id}</h3>
+                    <p className="text-sm text-gray-500">{parcel.description || "No description provided"}</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <select
+                      value={agentAssignments[parcel.id] || ""}
+                      onChange={(e) =>
+                        setAgentAssignments((prev) => ({
+                          ...prev,
+                          [parcel.id]: Number(e.target.value),
+                        }))
+                      }
+                      className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                    >
+                      <option value="">Select Agent</option>
+                      {users
+                        .filter((u) => u.role === "agent")
+                        .map((agent) => (
+                          <option key={agent.id} value={agent.id}>
+                            {agent.email}
+                          </option>
+                        ))}
+                    </select>
+                    <button
+                      onClick={() => assignAgent(parcel.id)}
+                      disabled={assigning[parcel.id]}
+                      className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white ${
+                        assigning[parcel.id]
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                      }`}
+                    >
+                      {assigning[parcel.id] ? "Assigning..." : "Assign"}
+                    </button>
+                  </div>
+                </div>
                 {parcel.assigned_agent && (
-                  <span className="text-sm text-green-700 font-medium ml-2">
-                    Assigned to:{" "}
-                    {users.find((u) => u.id === parcel.assigned_agent)?.email}
-                  </span>
+                  <div className="mt-3 text-sm text-green-600 font-medium">
+                    Currently assigned to: {users.find((u) => u.id === parcel.assigned_agent)?.email}
+                  </div>
                 )}
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 mt-8">
+        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-sm text-gray-500">
+            &copy; {new Date().getFullYear()} Delivery App Admin. All rights reserved.
+          </p>
         </div>
-      </section>
+      </footer>
     </div>
   );
 }
