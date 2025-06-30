@@ -150,3 +150,7 @@ JWT_SECRET_KEY=your-secret-key
 👩🏽‍💻 Developer
 Evelyne Joseph
 Edwin Mammet
+=======
+Edwin mammet
+
+>>>>>>> dev
