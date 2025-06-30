@@ -4,8 +4,7 @@
 SwiftDrop is a backend REST API for managing parcel deliveries. It enables user registration, authentication, agent tracking, parcel creation, and admin-level operations. Built with **Flask**, it follows a modular structure and secure authentication using JWT.
 
 ---
-
-## 🚀 Live Deployment
+🔗 [Frontend + API Live Deployment](https://swiftdrop-1.onrender.com)
 
 - **🌐 Base URL:** [https://swiftdrop-xh7v.onrender.com](https://swiftdrop-xh7v.onrender.com)
 - **📜 API Docs (Debug Route):** `/__debug__/routes`
@@ -14,35 +13,60 @@ SwiftDrop is a backend REST API for managing parcel deliveries. It enables user 
 ```bash
 curl https://swiftdrop-xh7v.onrender.com/health
 📁 Project Structure
-backend/
-├── app/
-│   ├── models/           # SQLAlchemy models (User, Parcel, etc.)
-│   ├── schemas/          # Marshmallow schemas for validation
-│   ├── resources/        # API route handlers (Flask-RESTful)
-│   ├── utils/            # JWT, role-based access decorators
-│   ├── extensions.py     # App extensions (db, jwt, ma, migrate)
-│   └── __init__.py       # Application factory
-├── run.py                # Entry point
-├── requirements.txt      # Python dependencies
-├── .env                  # Environment variables
-🧰 Tech Stack
-Python 3.12
+├── backend/ # Flask REST API
+│ ├── app/
+│ │ ├── models/ # SQLAlchemy models (User, Parcel, etc.)
+│ │ ├── schemas/ # Marshmallow validation schemas
+│ │ ├── resources/ # API endpoints using Flask-RESTful
+│ │ ├── utils/ # JWT + role decorators
+│ │ ├── extensions.py # App extensions
+│ │ └── init.py # App factory
+│ ├── run.py # Entry point
+│ ├── requirements.txt # Python dependencies
+│ └── .env # Environment variables
+│
+├── frontend/ # React-based user interface
+│ ├── public/
+│ ├── src/
+│ │ ├── pages/ # Route components (Dashboard, Login, Register)
+│ │ ├── components/ # Shared components (Tiles, Forms, Navbar)
+│ │ └── api/axios.js # Axios base config
+│ └── tailwind.config.js # Styling with Tailwind CSS
 
-Flask
+yaml
+Copy
+Edit
 
-Flask-RESTful
 
-Flask-JWT-Extended
+---
 
-Flask-SQLAlchemy
+## 🧰 Tech Stack
 
-Flask-Migrate
+### Backend:
+- Python 3.12
+- Flask
+- Flask-RESTful
+- Flask-JWT-Extended
+- Flask-SQLAlchemy
+- Flask-Migrate
+- Flask-Marshmallow
+- PostgreSQL
+- Render (deployment)
 
-Flask-Marshmallow
+### Frontend:
+- React.js
+- React Router
+- Axios
+- Tailwind CSS
+- Render (deployment)
 
-PostgreSQL
+---
 
-Render (for deployment)
+## 🔐 Authentication & Roles
+
+### ✅ Register
+
+
 
 🔐 Authentication & Roles
 Register
@@ -139,6 +163,19 @@ Database: PostgreSQL (cloud-hosted)
 FLASK_APP=run.py
 SQLALCHEMY_DATABASE_URI=postgresql://user:password@host:5432/dbname?options=-csearch_path=swiftdrop_schema
 JWT_SECRET_KEY=your-secret-key
+
+🌍 Frontend Features
+Clean, responsive UI built with Tailwind CSS
+
+Role-based dashboards (Admin, Agent, Sender)
+
+Parcel creation, tracking, delivery status updates
+
+Smooth routing and navigation
+
+Gradient-themed branding using gray, purple, and indigo
+
+
 📌 Future Enhancements
 Add /auth/reset-password endpoint
 
@@ -150,6 +187,4 @@ Add unit tests using pytest
 
 👩🏽‍💻 Developer
 Evelyne Joseph
-🚀 Software Developer — Django | Flask | API | PostgreSQL
-📧 evelynejose1993@gmail.com
-🔗 GitHub: Eve-code93
+Edwin mammet
