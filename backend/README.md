@@ -1,189 +1,153 @@
-# 🚚 SwiftDrop - Parcel Delivery API (Flask)
+# 📦 SwiftDrop - Parcel Delivery Tracker
 
-**SwiftDrop** is a backend system for managing parcel deliveries, built with **Flask** and following a RESTful architecture.
-
-## ✅ Features
-
-- User registration & authentication  
-- Admin management  
-- Agent delivery updates  
-- Parcel tracking  
+SwiftDrop is a full-stack parcel delivery and tracking platform. It simplifies logistics for Senders, Agents, and Admins. Users can send parcels, track delivery progress, update statuses, and manage operations securely.
 
 ---
 
-## 🚀 Live Deployment
-
-- 🌐 **Base URL:** https://swiftdrop-xh7v.onrender.com  
-- 📜 **API Docs (Flask Debug):** `/__debug__/routes`  
-- ❤️ **Health Check:**
-
+## 🌐 Live Demo  
+Frontend: **[https://swiftdrop-1.onrender.com/](https://swiftdrop-1.onrender.com/)**  
+Base API URL: **[https://swiftdrop-xh7v.onrender.com](https://swiftdrop-xh7v.onrender.com)**  
+API Docs (Debug): `/__debug__/routes`  
+Health Check:
 ```bash
 curl https://swiftdrop-xh7v.onrender.com/health
 📁 Project Structure
 bash
 Copy
 Edit
-backend/
-├── app/
-│   ├── models/           # SQLAlchemy models (User, Parcel, etc.)
-│   ├── schemas/          # Marshmallow schemas
-│   ├── resources/        # Flask-RESTful route handlers
-│   ├── utils/            # JWT + Role decorators
-│   ├── extensions.py     # Extensions (db, jwt, ma, migrate)
-│   └── __init__.py       # App factory + route registration
-├── run.py                # App entry point
-├── requirements.txt      # All dependencies
-├── .env                  # Environment variables
+.
+├── backend/
+│   ├── app/
+│   │   ├── models/           # SQLAlchemy models (User, Parcel, etc.)
+│   │   ├── schemas/          # Marshmallow schemas for validation
+│   │   ├── resources/        # API route handlers (Flask-RESTful)
+│   │   ├── utils/            # JWT, role-based access decorators
+│   │   ├── extensions.py     # App extensions (db, jwt, ma, migrate)
+│   │   └── __init__.py       # Application factory
+│   ├── run.py                # Entry point
+│   ├── requirements.txt
+│   └── .env
+│
+└── frontend/
+    ├── src/
+    │   ├── pages/
+    │   ├── components/
+    │   ├── api/
+    │   └── auth/
+    ├── public/
+    ├── tailwind.config.js
+    └── vite.config.js
 🧰 Tech Stack
-Python 3.12
+🖥 Backend (Flask)
+Flask, Flask-RESTful
 
-Flask & Flask-RESTful
+Flask-JWT-Extended (Auth)
 
-Flask-JWT-Extended
-
-Flask-SQLAlchemy
+SQLAlchemy + Marshmallow
 
 Flask-Migrate
 
-Flask-Marshmallow
+PostgreSQL (Cloud)
 
-PostgreSQL
+🎨 Frontend (React + Tailwind)
+React 18 + Vite
 
-Render (Deployment)
+React Router
 
-🔐 Authentication
-Register
-http
-Copy
-Edit
-POST /auth/register
-Payload:
+Tailwind CSS
 
-json
-Copy
-Edit
-{
-  "username": "admin1",
-  "email": "admin@example.com",
-  "password": "adminpass",
-  "role": "admin"
-}
-Login
-http
-Copy
-Edit
-POST /auth/login
-Payload:
+Axios
 
-json
-Copy
-Edit
-{
-  "email": "admin@example.com",
-  "password": "adminpass"
-}
-Response:
+🚀 Deployment
+Render (Frontend + Backend)
 
-json
-Copy
-Edit
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR..."
-}
-🔓 Roles & Capabilities
-Admin: Manage users, assign agents, view delivery metrics
+PostgreSQL on Render
 
-Sender: Create and track parcels
+🔐 Authentication & Roles
+Role	Description
+Admin	Manages users, assigns agents, oversees system metrics
+Sender	Creates and tracks parcels
+Agent	Updates delivery status of assigned parcels
 
-Agent: Update delivery status, view assigned deliveries
+🔀 Key API Endpoints
+✅ Public
+POST /auth/register – Register
 
-🔀 API Endpoints
-🟢 Public
-POST /auth/register — Register a new user
-
-POST /auth/login — Login and receive a JWT token
+POST /auth/login – Login and receive JWT
 
 🔵 Admin Only
-GET /admin/users — View all registered users
+GET /admin/users
 
-PUT /admin/users/<user_id> — Update user role
+PUT /admin/users/:id
 
-POST /admin/assign — Assign agent to a parcel
+POST /admin/assign
 
-GET /admin/metrics — View parcel delivery statistics
+GET /admin/metrics
 
-DELETE /parcels/<id>/tracking — Delete all tracking logs for a parcel
+DELETE /parcels/:id/tracking
 
-GET /tracking-logs — View all tracking logs
-
-POST /tags — Create a new tag
+POST /tags
 
 🟠 Sender
-POST /parcels — Create a new parcel
+POST /parcels – Create new parcel
 
 🟡 Agent
-GET /agent/deliveries — View assigned parcels
+GET /agent/deliveries
 
-PUT /agent/deliveries/<parcel_id> — Update delivery status
+PUT /agent/deliveries/:id
 
-POST /parcels/<id>/tracking — Add a tracking log
+POST /parcels/:id/tracking
 
-🟣 General Access (All Roles)
-GET /parcels — List all parcels
+🟣 All Authenticated Users
+GET /parcels
 
-GET /parcels/<id> — Get parcel details
+GET /parcels/:id
 
-GET /parcels/<id>/tracking — View tracking logs
+GET /parcels/:id/tracking
 
-PUT /parcels/<id> — Update parcel (admin only)
+PUT /parcels/:id (admin only)
 
-GET /tags — List all tags
+GET /tags
 
-🧪 Example Request (with curl)
-Create a Parcel (as sender)
+🧪 Sample curl Usage
 bash
 Copy
 Edit
+# Create a parcel (as sender)
 curl -X POST https://swiftdrop-xh7v.onrender.com/parcels \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"description": "Phone", "sender_id": 1}'
-🧪 Testing Checklist
-✅ Test with Postman or curl
+🧪 Testing Tips
+Use Postman or curl to test
 
-✅ Use test users with different roles
+Login with different roles
 
-✅ Confirm:
+Confirm:
 
-JWT protection works
+🔐 JWT protection is active
 
-Admin-only/Agent-only routes are protected
+✅ Role-based access control
 
-Clear error messages for bad requests
+🔄 Clear error messages
 
-✅ Deployment Notes
-Platform: Render
-
-Database: PostgreSQL (cloud-hosted)
-
-.env Example
+🔧 .env Example
 env
 Copy
 Edit
 FLASK_APP=run.py
 SQLALCHEMY_DATABASE_URI=postgresql://user:password@host:5432/dbname?options=-csearch_path=swiftdrop_schema
-JWT_SECRET_KEY=your-secret
+JWT_SECRET_KEY=your-secret-key
 📌 Future Enhancements
-Add /auth/reset-password endpoint
+🔁 Password reset endpoint
 
-Add pagination for parcels list
+📜 Pagination for parcels
 
-Add Swagger/ReDoc API documentation
+📘 Swagger/ReDoc API documentation
 
-Write unit tests using pytest
+🧪 Unit tests with Pytest
 
-👨‍💻 Developer
+👩🏽‍💻 Developer
 Evelyne Joseph
-🚀 Software Developer | Django | Flask | APIs | PostgreSQL
-📧 evelynejose1993@gmail.com
-🔗 GitHub: Eve-code93
+Edwin mammet
+
